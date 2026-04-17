@@ -6,7 +6,7 @@
 ### Features
 
 * add local.compose.yml for standalone local development ([40e2117](https://github.com/webmappsrl/laravel-postgis-boilerplate/commit/40e21175ba80d779e5a70cb14d359b18ec51a9b1))
-* align boilerplate with camminiditalia improvements ([b3400c4](https://github.com/webmappsrl/laravel-postgis-boilerplate/commit/b3400c423212637755e15b8b6127b282810e446a))
+* align boilerplate with upstream reference improvements ([b3400c4](https://github.com/webmappsrl/laravel-postgis-boilerplate/commit/b3400c423212637755e15b8b6127b282810e446a))
 * **nova:** ✨ add Media resource and update NovaServiceProvider ([7516557](https://github.com/webmappsrl/laravel-postgis-boilerplate/commit/75165577e8fbccbe20d19e1ee81659242309f147))
 
 
