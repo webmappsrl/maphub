@@ -18,24 +18,55 @@ use Wm\WmPackage\Http\Clients\OsmClient;
  *
  * I tag OSM presi in considerazione per derivare la coppia
  * (chiave-OSM, valore-OSM) usata come "poi type" sono in {@see self::POI_TYPE_TAG_KEYS},
- * nell'ordine di precedenza che riflette la semantica del nostro dominio.
+ * in ordine alfabetico: la prima chiave presente sui tag del node vince.
  */
 readonly class OsmNodePoiData
 {
     /**
      * Chiavi tag OSM accettate per derivare il TaxonomyPoiType.
-     * L'ordine determina la precedenza quando un node ha più tag classificanti.
+     * Ordine alfabetico: la prima chiave presente (e non vuota / non "no") vince.
      *
      * @var list<string>
      */
     public const POI_TYPE_TAG_KEYS = [
-        'tourism',
+        'advertising',
+        'aerialway',
+        'aeroway',
         'amenity',
+        'attraction',
+        'barrier',
+        'boundary',
+        'building',
+        'checkpoint',
+        'club',
+        'craft',
+        'emergency',
+        'entrance',
+        'ford',
+        'geological',
+        'healthcare',
+        'highway',
         'historic',
-        'natural',
+        'landuse',
         'leisure',
-        'shop',
         'man_made',
+        'military',
+        'mountain_pass',
+        'natural',
+        'office',
+        'place',
+        'power',
+        'public_transport',
+        'railway',
+        'route',
+        'shop',
+        'sport',
+        'telecom',
+        'tourism',
+        'traffic_calming',
+        'traffic_sign',
+        'water',
+        'waterway',
     ];
 
     /**
