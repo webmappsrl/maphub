@@ -13,6 +13,8 @@ use Wm\WmPackage\Models\TaxonomyPoiType;
  * Risolve un {@see TaxonomyPoiType} a partire dalla coppia (chiave-OSM, valore-OSM) ricavata da {@see OsmNodePoiData}.
  *
  * Strategia (in ordine):
+ *  0. Nessun tag classificante tra quelli noti → fallback sul {@see TaxonomyPoiType} con identifier 'poi'
+ *     (esistente in DB, oppure creato al primo import reale se mancante).
  *  1. Match esatto per `identifier` sul valore OSM normalizzato (es. "viewpoint").
  *  2. Match esatto sull'identifier composito "chiave-valore" (es. "tourism-viewpoint").
  *  3. Match case-insensitive con trim (covering legacy identifier salvati con casing diverso).
@@ -39,9 +41,11 @@ class OsmTaxonomyPoiTypeResolver
     public function resolve(OsmNodePoiData $data, bool $dryRun = false): array
     {
         if ($data->poiTypeOsmKey === null || $data->poiTypeOsmValue === null) {
+            $fallback = $this->fallbackGenericPoi($dryRun);
+
             return [
-                'taxonomy' => $this->fallbackGenericPoi($dryRun),
-                'created' => false,
+                'taxonomy' => $fallback['taxonomy'],
+                'created' => $fallback['created'],
             ];
         }
 
@@ -130,13 +134,15 @@ class OsmTaxonomyPoiTypeResolver
     }
 
     /**
-     * Quando il node OSM non ha un tag classificante, ripieghiamo su un TaxonomyPoiType "poi" già presente in DB,
-     * oppure su un'istanza non persistita (caso dry-run o DB vuoto: non vogliamo creare un fallback "poi" in modo silenzioso).
+     * Quando il node OSM non ha un tag classificante, usa sempre il {@see TaxonomyPoiType} con identifier 'poi'.
+     * Se non esiste: in import reale viene creato; in dry-run si restituisce un'istanza non persistita e created=true.
+     *
+     * @return array{taxonomy: TaxonomyPoiType, created: bool}
      */
-    private function fallbackGenericPoi(bool $dryRun): TaxonomyPoiType
+    private function fallbackGenericPoi(bool $dryRun): array
     {
         if ($existing = $this->findByIdentifier('poi')) {
-            return $existing;
+            return ['taxonomy' => $existing, 'created' => false];
         }
 
         $taxonomy = new TaxonomyPoiType;
@@ -144,18 +150,23 @@ class OsmTaxonomyPoiTypeResolver
         $taxonomy->setTranslation('name', 'it', 'POI');
         $taxonomy->setTranslation('name', 'en', 'POI');
 
-        if (! $dryRun) {
-            try {
-                DB::transaction(function () use ($taxonomy) {
-                    $taxonomy->save();
-                });
-                $this->cache['poi'] = $taxonomy;
-            } catch (\Throwable) {
-                // Race condition: ricarica.
-                return TaxonomyPoiType::query()->where('identifier', 'poi')->firstOrFail();
-            }
+        if ($dryRun) {
+            return ['taxonomy' => $taxonomy, 'created' => true];
         }
 
-        return $taxonomy;
+        try {
+            DB::transaction(function () use ($taxonomy) {
+                $taxonomy->save();
+            });
+            $this->cache['poi'] = $taxonomy;
+
+            return ['taxonomy' => $taxonomy, 'created' => true];
+        } catch (\Throwable) {
+            // Race: un altro processo ha creato "poi" nel frattempo.
+            $existing = TaxonomyPoiType::query()->where('identifier', 'poi')->firstOrFail();
+            $this->cache['poi'] = $existing;
+
+            return ['taxonomy' => $existing, 'created' => false];
+        }
     }
 }
