@@ -19,16 +19,17 @@ class ImportReport
     private array $failures = [];
 
     /**
-     * Etichette delle categorie di errore, in italiano, ordinate dalla più alla meno comune.
+     * Etichette delle categorie di errore (stringhe inglesi passate a {@see __()}).
+     * Traduzioni: `lang/{locale}.json` dell’app (it, en, fr, es, de).
      *
      * @var array<string, string>
      */
     public const CATEGORY_LABELS = [
-        'not_found_or_invalid_osm' => 'Node non trovato o risposta OSM non valida',
-        'no_tags' => 'Node OSM senza tag (nessun dato utile)',
-        'geometry' => 'Geometria OSM non valida',
-        'storage' => 'Storage S3/MinIO (disk wmfe) non configurato o errore dopo il salvataggio',
-        'other' => 'Altro errore',
+        'not_found_or_invalid_osm' => 'Node not found or invalid OSM response',
+        'no_tags' => 'OSM node has no tags (nothing useful to import)',
+        'geometry' => 'Invalid OSM geometry',
+        'storage' => 'S3/MinIO storage (wmfe disk) not configured or error after save',
+        'other' => 'Other error',
     ];
 
     public function __construct(public readonly bool $dryRun) {}

@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Dto;
 
 use App\Models\EcPoi;
-use Illuminate\Support\Str;
 use Wm\WmPackage\Dto\EcPoiPropertiesData;
 use Wm\WmPackage\Http\Clients\OsmClient;
 
@@ -123,7 +122,7 @@ readonly class OsmNodePoiData
 
         return new self(
             osmid: $osmid,
-            nameTranslations: self::extractNameTranslations($tags, $poiValue),
+            nameTranslations: self::extractNameTranslations($tags),
             lat: $lat,
             lng: $lng,
             poiTypeOsmKey: $poiKey,
@@ -204,7 +203,10 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Costruisce il DTO delle properties usando i tag OSM e includendo il blocco di audit `osm`.
+     * Costruisce il DTO delle properties usando i tag OSM.
+     * La struttura risultante è allineata alla convenzione wm-package:
+     *  - `properties.osmid` → ID numerico top-level (compatibile con query SQL / EcTrackService)
+     *  - `properties.osm_data` → blocco audit con `type`, `source_updated_at`, `tags`
      */
     public function toEcPoiProperties(): OsmEcPoiPropertiesData
     {
@@ -238,12 +240,13 @@ readonly class OsmNodePoiData
 
     /**
      * Estrae le traduzioni del name dai tag OSM (`name`, `name:it`, `name:en`, ...).
-     * Se non c'è alcun `name`, ricade su una versione "titlecased" del valore OSM.
+     * Se OSM non fornisce alcun `name*`, ritorna array vuoto: il fallback (es. nome della
+     * tassonomia matchata) è responsabilità del chiamante.
      *
      * @param  array<string, string>  $tags
      * @return array<string, string>
      */
-    private static function extractNameTranslations(array $tags, ?string $fallbackOsmValue): array
+    private static function extractNameTranslations(array $tags): array
     {
         $translations = [];
 
@@ -256,12 +259,6 @@ readonly class OsmNodePoiData
 
         if (! isset($translations['it']) && isset($tags['name']) && $tags['name'] !== '') {
             $translations['it'] = $tags['name'];
-        }
-
-        if ($translations === [] && $fallbackOsmValue !== null && $fallbackOsmValue !== '') {
-            $human = Str::title(str_replace(['_', '-'], ' ', $fallbackOsmValue));
-            $translations['it'] = $human;
-            $translations['en'] = $human;
         }
 
         return $translations;

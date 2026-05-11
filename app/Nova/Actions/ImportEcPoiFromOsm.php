@@ -22,7 +22,8 @@ use Wm\WmPackage\Models\App;
 /**
  * Importa POI (`EcPoi`) a partire da OSMID di tipo `node` separati da virgola.
  *
- * UI: textarea + select app (se più di una) + utente obbligatorio (ricercabile) + dry-run.
+ * Testi UI: chiavi inglesi con {@see __()} e traduzioni in `lang/{it,en,fr,es,de}.json`.
+ * UI: textarea + select app (se più di una) + utente obbligatorio (ricercabile) + global + dry-run.
  * Logica: delegata interamente a {@see OsmPoiImporter}.
  */
 class ImportEcPoiFromOsm extends Action
@@ -31,13 +32,16 @@ class ImportEcPoiFromOsm extends Action
 
     public $standalone = true;
 
-    public $confirmText = 'Verranno scaricati i dati da openstreetmap.org per ogni OSMID. Continuare?';
-
-    public $confirmButtonText = 'Importa';
+    public function __construct()
+    {
+        // Stringhe inglesi: Nova applica `Nova::__()` in serializzazione (locale utente corretto).
+        $this->confirmText = 'Data will be downloaded from openstreetmap.org for each OSM ID. Continue?';
+        $this->confirmButtonText = 'Import';
+    }
 
     public function name(): string
     {
-        return __('Import POI da OSM');
+        return __('Import POIs from OSM');
     }
 
     public function handle(ActionFields $fields, Collection $models): mixed
@@ -46,20 +50,21 @@ class ImportEcPoiFromOsm extends Action
         $osmIds = $this->parseOsmIds($rawOsmIds);
 
         if ($osmIds === []) {
-            return Action::danger(__('Nessun OSMID valido trovato. Inserire ID numerici separati da virgola.'));
+            return Action::danger(__('No valid OSM IDs found. Enter numeric IDs separated by commas.'));
         }
 
         $appId = $this->resolveAppId($fields);
         if ($appId === null) {
-            return Action::danger(__('Nessuna App selezionata o disponibile.'));
+            return Action::danger(__('No app selected or available.'));
         }
 
         $userId = $this->resolveUserId($fields);
         $dryRun = (bool) $fields->get('dry_run');
+        $global = (bool) $fields->get('global', true);
 
         /** @var OsmPoiImporter $importer */
         $importer = app(OsmPoiImporter::class);
-        $report = $importer->importNodes($osmIds, $appId, $userId, $dryRun);
+        $report = $importer->importNodes($osmIds, $appId, $userId, $dryRun, $global);
 
         $message = $this->buildSummaryMessage($report, count($osmIds));
 
@@ -77,10 +82,10 @@ class ImportEcPoiFromOsm extends Action
      */
     private function buildSummaryMessage(ImportReport $report, int $requested): string
     {
-        $prefix = $report->dryRun ? '[DRY-RUN] ' : '';
+        $prefix = $report->dryRun ? __('[DRY-RUN] ') : '';
 
         $lines = [];
-        $lines[] = $prefix.__('Richiesti :req OSMID. Importati :created, aggiornati :updated, skippati :fail.', [
+        $lines[] = $prefix.__('Requested :req OSM IDs. Created :created, updated :updated, skipped :fail.', [
             'req' => $requested,
             'created' => $report->createdCount(),
             'updated' => $report->updatedCount(),
@@ -88,17 +93,17 @@ class ImportEcPoiFromOsm extends Action
         ]);
 
         if ($report->newTaxonomiesCount() > 0) {
-            $lines[] = __('Nuove taxonomy create: :tax.', ['tax' => $report->newTaxonomiesCount()]);
+            $lines[] = __('New taxonomies created: :tax.', ['tax' => $report->newTaxonomiesCount()]);
         }
 
         $byCategory = $report->failuresByCategory();
         if ($byCategory !== []) {
             $parts = [];
             foreach ($byCategory as $category => $count) {
-                $label = ImportReport::CATEGORY_LABELS[$category] ?? $category;
+                $label = __(ImportReport::CATEGORY_LABELS[$category] ?? $category);
                 $parts[] = "{$label}: {$count}";
             }
-            $lines[] = __('Motivi degli skip — ').implode(' · ', $parts);
+            $lines[] = __('Skip reasons — ').implode(' · ', $parts);
         }
 
         if ($report->failuresCount() > 0) {
@@ -107,8 +112,8 @@ class ImportEcPoiFromOsm extends Action
                 ->map(static fn ($f) => 'node/'.$f['osmid'])
                 ->implode(', ');
             $more = $report->failuresCount() - count($firstErrors);
-            $suffix = $more > 0 ? " (+{$more} altri)" : '';
-            $lines[] = __('OSMID non importati (primi): ').$ids.$suffix;
+            $suffix = $more > 0 ? ' '.__('(and :count more)', ['count' => $more]) : '';
+            $lines[] = __('OSM IDs not imported (first): ').$ids.$suffix;
         }
 
         return implode(' — ', $lines);
@@ -117,9 +122,9 @@ class ImportEcPoiFromOsm extends Action
     public function fields(NovaRequest $request): array
     {
         $fields = [
-            Textarea::make(__('OSMID dei node (separati da virgola)'), 'osm_ids')
+            Textarea::make(__('OSM node IDs (comma-separated)'), 'osm_ids')
                 ->rows(4)
-                ->help(__('Esempio: 12345, 67890, 11223. Solo node OSM (i punti).'))
+                ->help(__('Example: 12345, 67890, 11223. OSM nodes only (points).').' '.__('If an OSM ID was already imported, its POI will be updated.'))
                 ->rules('required', 'string', 'max:10000'),
         ];
 
@@ -139,16 +144,20 @@ class ImportEcPoiFromOsm extends Action
             static fn (User $u): array => [$u->id => "{$u->name} ({$u->email})"]
         )->all();
 
-        $fields[] = Select::make(__('Utente'), 'user_id')
+        $fields[] = Select::make(__('User'), 'user_id')
             ->options($userOptions)
             ->searchable()
             ->displayUsingLabels()
-            ->help(__('Proprietario del POI (obbligatorio).'))
+            ->help(__('POI owner (required).'))
             ->rules('required', 'integer', Rule::exists(User::class, 'id'));
 
-        $fields[] = Boolean::make(__('Dry run (nessuna scrittura)'), 'dry_run')
+        $fields[] = Boolean::make(__('Include in app pois.geojson (EcPoi.global = true)'), 'global')
+            ->default(true)
+            ->help(__('When enabled, POIs are included in the app’s pois.geojson file (global filter in getAllPoisGeojson). When disabled, they are imported but excluded from that file until global is set to true.'));
+
+        $fields[] = Boolean::make(__('Dry run (no writes)'), 'dry_run')
             ->default(false)
-            ->help(__('Se attivo: scarica e mostra l\'esito senza creare/modificare nulla.'));
+            ->help(__('When enabled, data is fetched and the outcome is shown without persisting any changes.'));
 
         return $fields;
     }

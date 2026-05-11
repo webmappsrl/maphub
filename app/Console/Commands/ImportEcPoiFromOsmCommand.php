@@ -16,6 +16,7 @@ use Wm\WmPackage\Models\App;
  *   php artisan maphub:import-ec-pois-from-osm "12345,67890,11223" --app=1
  *   php artisan maphub:import-ec-pois-from-osm 12345 --app=1 --dry-run
  *   php artisan maphub:import-ec-pois-from-osm @osmids.txt --app=1
+ *   php artisan maphub:import-ec-pois-from-osm 12345 --app=2 --no-global
  */
 class ImportEcPoiFromOsmCommand extends Command
 {
@@ -23,7 +24,8 @@ class ImportEcPoiFromOsmCommand extends Command
         {osmids : OSMID di node separati da virgola, oppure "@/path/file.txt" per leggere da file}
         {--app= : ID dell\'App di destinazione (auto se esiste una sola App)}
         {--user= : ID utente proprietario (default: nessuno)}
-        {--dry-run : Esegue senza persistere; mostra solo cosa farebbe}';
+        {--dry-run : Esegue senza persistere; mostra solo cosa farebbe}
+        {--no-global : Imposta EcPoi.global=false (esclusi dal pois.geojson; default: global true)}';
 
     protected $description = 'Importa nuovi EcPoi da OpenStreetMap (solo node) mappando i tag OSM su TaxonomyPoiType.';
 
@@ -45,16 +47,18 @@ class ImportEcPoiFromOsmCommand extends Command
 
         $userId = $this->option('user') !== null ? (int) $this->option('user') : null;
         $dryRun = (bool) $this->option('dry-run');
+        $global = ! (bool) $this->option('no-global');
 
         $this->info(sprintf(
-            '%sImporto %d OSMID nell\'App %d%s ...',
+            '%sImporto %d OSMID nell\'App %d%s (global=%s) ...',
             $dryRun ? '[DRY-RUN] ' : '',
             count($osmIds),
             $appId,
             $userId !== null ? " (user_id={$userId})" : '',
+            $global ? 'true' : 'false',
         ));
 
-        $report = $importer->importNodes($osmIds, $appId, $userId, $dryRun);
+        $report = $importer->importNodes($osmIds, $appId, $userId, $dryRun, $global);
 
         $this->renderReport($report);
 

@@ -9,7 +9,11 @@ use Wm\WmPackage\Dto\EcPoiPropertiesData;
 /**
  * DTO project-specific che estende {@see EcPoiPropertiesData} aggiungendo i campi properties
  * effettivamente esposti dalla resource Nova `EcPoi` ma non presenti sul DTO base
- * (`opening_hours`, `addr_locality`, `addr_housenumber`) + un blocco audit `osm` con i tag grezzi.
+ * (`opening_hours`, `addr_locality`, `addr_housenumber`) + dati di provenienza OSM.
+ *
+ * Struttura allineata alla convenzione wm-package (vedi EcTrackService / HasDemClassification):
+ *  - `osmid` al top-level di `properties` (field dedicato, leggibile da query SQL dirette)
+ *  - `osm_data` al top-level di `properties`: dizionario con `type`, `source_updated_at`, `tags`
  *
  * Pattern allineato al commento del DTO base: classe readonly, override di `toArray()` che fa
  * `array_merge(parent::toArray(), [...])` per non perdere il filtro dei null.
@@ -22,9 +26,9 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     /**
      * @param  array<string, string>|null  $description
      * @param  array<string, string>|null  $excerpt
-     * @param  array<string, string>|null  $related_url_assoc  Mappa "label" ⇒ url (Nova KeyValue). Tenuta separata
-     *                                                         dal `related_url` del DTO base che invece è tipato `list<string>`.
-     * @param  array<string, mixed>|null  $osm  Blocco audit dei dati di provenienza.
+     * @param  array<string, string>|null  $related_url  Mappa "label" ⇒ url (es. ['website' => 'https://...']); passata al parent per serializzazione standard.
+     * @param  array<string, mixed>|null  $osm_data  Blocco audit allineato alla convenzione wm-package.
+     * @param  int|null  $osmid  ID numerico del node OSM, salvato top-level per compatibilità con query SQL.
      */
     public function __construct(
         ?array $description = null,
@@ -34,11 +38,12 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
         ?int $capacity = null,
         ?string $contact_phone = null,
         ?string $contact_email = null,
-        public ?array $related_url_assoc = null,
+        ?array $related_url = null,
         public ?string $opening_hours = null,
         public ?string $addr_locality = null,
         public ?string $addr_housenumber = null,
-        public ?array $osm = null,
+        public ?array $osm_data = null,
+        public ?int $osmid = null,
     ) {
         parent::__construct(
             description: $description,
@@ -48,7 +53,7 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
             capacity: $capacity,
             contact_phone: $contact_phone,
             contact_email: $contact_email,
-            related_url: null,
+            related_url: $related_url,
         );
     }
 
@@ -56,12 +61,20 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
      * Factory: derivata dai tag OSM (già normalizzati a string).
      *
      * @param  array<string, string>  $tags
-     * @param  array<string, mixed>  $audit  Eventuale blocco `osm` da fondere nelle properties.
+     * @param  array<string, mixed>  $audit  Deve contenere `osmid` (int), `type` (string), `source_updated_at` (string|null), `tags` (array).
      */
     public static function fromOsmTags(array $tags, array $audit = []): self
     {
         $capacity = self::firstNonEmpty($tags, ['capacity']);
         $capacityInt = $capacity !== null && ctype_digit(trim($capacity)) ? (int) $capacity : null;
+
+        $osmid = isset($audit['osmid']) && is_int($audit['osmid']) ? $audit['osmid'] : null;
+
+        $osmData = $audit !== [] ? array_filter([
+            'type' => $audit['type'] ?? null,
+            'source_updated_at' => $audit['source_updated_at'] ?? null,
+            'tags' => $audit['tags'] ?? null,
+        ], static fn ($v) => $v !== null) : null;
 
         return new self(
             description: self::extractTranslated($tags, 'description'),
@@ -71,11 +84,12 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
             capacity: $capacityInt,
             contact_phone: self::firstNonEmpty($tags, ['contact:phone', 'phone']),
             contact_email: self::firstNonEmpty($tags, ['contact:email', 'email']),
-            related_url_assoc: self::extractRelatedUrls($tags),
+            related_url: self::extractRelatedUrls($tags),
             opening_hours: self::firstNonEmpty($tags, ['opening_hours']),
             addr_locality: self::firstNonEmpty($tags, ['addr:city']),
             addr_housenumber: self::firstNonEmpty($tags, ['addr:housenumber']),
-            osm: $audit !== [] ? $audit : null,
+            osm_data: $osmData !== [] ? $osmData : null,
+            osmid: $osmid,
         );
     }
 
@@ -85,11 +99,11 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     public function toArray(): array
     {
         $extra = array_filter([
+            'osmid' => $this->osmid,
             'opening_hours' => $this->opening_hours,
             'addr_locality' => $this->addr_locality,
             'addr_housenumber' => $this->addr_housenumber,
-            'related_url' => $this->related_url_assoc,
-            'osm' => $this->osm,
+            'osm_data' => $this->osm_data,
         ], static fn ($v) => $v !== null && $v !== '' && $v !== []);
 
         return array_merge(parent::toArray(), $extra);

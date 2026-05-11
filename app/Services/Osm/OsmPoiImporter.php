@@ -7,6 +7,7 @@ namespace App\Services\Osm;
 use App\Dto\OsmNodePoiData;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Wm\WmPackage\Exceptions\OsmClientException;
 use Wm\WmPackage\Exceptions\OsmClientExceptionNoTags;
 use Wm\WmPackage\Http\Clients\OsmClient;
@@ -34,14 +35,16 @@ class OsmPoiImporter
      * @param  int  $appId  ID dell'App di destinazione (campo obbligatorio sullo schema `ec_pois`).
      * @param  int|null  $userId  Utente proprietario (opzionale).
      * @param  bool  $dryRun  Se true non persiste nulla.
+     * @param  bool  $global  Se la colonna `ec_pois.global` esiste: valore da impostare (true = inclusi in {@see \Wm\WmPackage\Models\App::getAllPoisGeojson()} / pois.geojson).
      */
-    public function importNodes(array $osmIds, int $appId, ?int $userId = null, bool $dryRun = false): ImportReport
+    public function importNodes(array $osmIds, int $appId, ?int $userId = null, bool $dryRun = false, bool $global = true): ImportReport
     {
         $report = new ImportReport($dryRun);
+        $hasGlobalColumn = Schema::hasColumn((new EcPoi)->getTable(), 'global');
 
         foreach ($this->normalizeIds($osmIds) as $osmid) {
             try {
-                $report->addOutcome($this->importSingleNode($osmid, $appId, $userId, $dryRun));
+                $report->addOutcome($this->importSingleNode($osmid, $appId, $userId, $dryRun, $global, $hasGlobalColumn));
             } catch (\Throwable $e) {
                 [$category, $message] = $this->classifyFailure($osmid, $e);
                 Log::warning('OsmPoiImporter: failure on node '.$osmid, [
@@ -110,7 +113,7 @@ class OsmPoiImporter
     /**
      * @return array{action: string, osmid: int, ec_poi_id: ?int, taxonomy_identifier: ?string, taxonomy_created: bool}
      */
-    private function importSingleNode(int $osmid, int $appId, ?int $userId, bool $dryRun): array
+    private function importSingleNode(int $osmid, int $appId, ?int $userId, bool $dryRun, bool $global, bool $hasGlobalColumn): array
     {
         [$properties, $geometry] = $this->fetchOsmNode($osmid);
         $dto = OsmNodePoiData::fromOsmNode($osmid, $properties, $geometry);
@@ -118,7 +121,7 @@ class OsmPoiImporter
         $resolution = $this->taxonomyResolver->resolve($dto, $dryRun);
         $taxonomy = $resolution['taxonomy'];
 
-        $existing = EcPoi::query()->where('osmid', $osmid)->first();
+        $existing = $this->findExistingEcPoiByOsmid($osmid);
         $action = $existing ? 'updated' : 'created';
 
         if ($dryRun) {
@@ -131,24 +134,38 @@ class OsmPoiImporter
             ];
         }
 
-        $ecPoi = DB::transaction(function () use ($dto, $existing, $appId, $userId, $taxonomy) {
+        $ecPoi = DB::transaction(function () use ($dto, $existing, $appId, $userId, $taxonomy, $global, $hasGlobalColumn) {
             $attrs = $dto->toEcPoiAttributes($appId, $userId);
             unset($attrs['name']);
 
+            // Campi da passare via fill (solo quelli in $fillable)
+            $fillable = array_diff_key($attrs, ['osmid' => true, 'name' => true, 'properties' => true]);
+
             if ($existing) {
-                $existing->fill(array_diff_key($attrs, ['properties' => true]));
-                $existing->properties = array_merge($existing->properties ?? [], $attrs['properties']);
-                $this->applyNameTranslations($existing, $dto);
+                $existing->fill($fillable);
+                $existing->properties = $this->mergeImportedEcPoiProperties(
+                    $existing->properties ?? [],
+                    $attrs['properties'],
+                );
+                $existing->setAttribute('osmid', $dto->osmid);
+                $this->applyNameTranslations($existing, $dto, $taxonomy);
+                if ($hasGlobalColumn) {
+                    $existing->global = $global;
+                }
                 $existing->save();
                 $poi = $existing;
             } else {
                 $poi = new EcPoi;
-                $poi->fill(array_diff_key($attrs, ['properties' => true]));
+                $poi->fill($fillable);
                 $poi->properties = $attrs['properties'];
+                $poi->setAttribute('osmid', $dto->osmid);
                 if ($userId !== null) {
                     $poi->setAttribute('user_id', $userId);
                 }
-                $this->applyNameTranslations($poi, $dto);
+                if ($hasGlobalColumn) {
+                    $poi->global = $global;
+                }
+                $this->applyNameTranslations($poi, $dto, $taxonomy);
                 $poi->save();
             }
 
@@ -171,6 +188,26 @@ class OsmPoiImporter
      *
      * @throws OsmClientException Se l'endpoint OSM non risponde JSON valido o il node non esiste.
      */
+    /**
+     * Record già importato dallo stesso node OSM: prima `properties->osmid` (JSON, utile se la
+     * colonna `osmid` non è valorizzata), poi la colonna `ec_pois.osmid`.
+     */
+    private function findExistingEcPoiByOsmid(int $osmid): ?EcPoi
+    {
+        $byProperties = EcPoi::query()
+            ->where(function ($query) use ($osmid) {
+                $query->where('properties->osmid', $osmid)
+                    ->orWhere('properties->osmid', (string) $osmid);
+            })
+            ->first();
+
+        if ($byProperties !== null) {
+            return $byProperties;
+        }
+
+        return EcPoi::query()->where('osmid', $osmid)->first();
+    }
+
     private function fetchOsmNode(int $osmid): array
     {
         try {
@@ -192,22 +229,43 @@ class OsmPoiImporter
     }
 
     /**
-     * Imposta le traduzioni del nome dal DTO. Se OSM non fornisce `name` / `name:*` ma c'è un tag
-     * classificante (es. amenity), {@see OsmNodePoiData} popola comunque `nameTranslations`.
-     * Se resta vuoto, si usa {@see OsmNodePoiData::primaryName()} (es. "OSM node 123") così il save non fallisce.
+     * Imposta le traduzioni del nome.
+     *
+     * Strategia, in ordine:
+     *  1. Tag OSM (`name`, `name:it`, `name:en`, ...) raccolti in {@see OsmNodePoiData::$nameTranslations}.
+     *  2. Se l'OSM non fornisce alcun `name*`, si usa il nome tradotto del {@see TaxonomyPoiType}
+     *     matchato/creato (es. "Punto panoramico" / "Viewpoint"), così il POI eredita un nome
+     *     coerente con la categoria invece della label OSM titlecased.
+     *  3. Ultimo fallback: {@see OsmNodePoiData::primaryName()} (es. "OSM node 123") per non
+     *     salvare un nome vuoto.
      */
-    private function applyNameTranslations(EcPoi $poi, OsmNodePoiData $dto): void
+    private function applyNameTranslations(EcPoi $poi, OsmNodePoiData $dto, TaxonomyPoiType $taxonomy): void
     {
-        foreach ($dto->nameTranslations as $locale => $value) {
-            if ($value === '') {
-                continue;
+        if ($dto->nameTranslations !== []) {
+            foreach ($dto->nameTranslations as $locale => $value) {
+                if ($value === '') {
+                    continue;
+                }
+                $poi->setTranslation('name', $locale, $value);
             }
-            $poi->setTranslation('name', $locale, $value);
+
+            return;
         }
 
-        if ($dto->nameTranslations === []) {
-            $poi->setTranslation('name', 'it', $dto->primaryName());
+        $taxonomyNames = array_filter(
+            $taxonomy->getTranslations('name'),
+            static fn ($value) => is_string($value) && $value !== '',
+        );
+
+        if ($taxonomyNames !== []) {
+            foreach ($taxonomyNames as $locale => $value) {
+                $poi->setTranslation('name', (string) $locale, $value);
+            }
+
+            return;
         }
+
+        $poi->setTranslation('name', 'it', $dto->primaryName());
     }
 
     /**
@@ -226,5 +284,22 @@ class OsmPoiImporter
         }
 
         return array_values(array_unique($ids));
+    }
+
+    /**
+     * Unisce le properties esistenti con quelle dell'import OSM e rimuove chiavi legacy
+     * che altrimenti resterebbero per effetto di {@see array_merge} (es. `related_url_assoc`
+     * prima dell’allineamento al DTO base, oppure il blocco `osm` sostituito da `osm_data` + `osmid`).
+     *
+     * @param  array<string, mixed>  $existing
+     * @param  array<string, mixed>  $import
+     * @return array<string, mixed>
+     */
+    private function mergeImportedEcPoiProperties(array $existing, array $import): array
+    {
+        $merged = array_merge($existing, $import);
+        unset($merged['related_url_assoc'], $merged['osm']);
+
+        return $merged;
     }
 }
