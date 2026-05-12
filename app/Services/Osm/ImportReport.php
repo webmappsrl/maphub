@@ -32,7 +32,20 @@ class ImportReport
         'other' => 'Other error',
     ];
 
+    /** Numero di OSMID non processati perché superato {@see config('osm-import.max_ids_per_run')}. */
+    private int $truncatedBeyondLimit = 0;
+
     public function __construct(public readonly bool $dryRun) {}
+
+    public function setTruncatedBeyondLimit(int $count): void
+    {
+        $this->truncatedBeyondLimit = max(0, $count);
+    }
+
+    public function truncatedBeyondLimit(): int
+    {
+        return $this->truncatedBeyondLimit;
+    }
 
     /**
      * @param  array{action: string, osmid: int, ec_poi_id: ?int, taxonomy_identifier: ?string, taxonomy_created: bool}  $outcome

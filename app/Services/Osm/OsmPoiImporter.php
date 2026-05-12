@@ -18,6 +18,8 @@ use Wm\WmPackage\Models\TaxonomyPoiType;
  * Servizio di alto livello: dato un set di OSMID di tipo `node`,
  * scarica i dati da OpenStreetMap (via {@see OsmClient}), li normalizza in {@see OsmNodePoiData}
  * e crea/aggiorna gli {@see EcPoi} associando il {@see TaxonomyPoiType} corretto.
+ * Testi lunghi (description, excerpt da inscription) restano nel JSON {@see EcPoi::$properties}
+ * perché lo schema DB del progetto non espone colonne dedicate per quelle chiavi.
  *
  * Modalità dry-run: nessuna persistenza, ritorna l'esito atteso utile per validazione interattiva (Nova/CLI).
  */
@@ -42,7 +44,17 @@ class OsmPoiImporter
         $report = new ImportReport($dryRun);
         $hasGlobalColumn = Schema::hasColumn((new EcPoi)->getTable(), 'global');
 
-        foreach ($this->normalizeIds($osmIds) as $osmid) {
+        $ids = $this->normalizeIds($osmIds);
+        $maxPerRun = (int) config('osm-import.max_ids_per_run', 0);
+        if ($maxPerRun > 0 && count($ids) > $maxPerRun) {
+            $report->setTruncatedBeyondLimit(count($ids) - $maxPerRun);
+            $ids = array_slice($ids, 0, $maxPerRun);
+        }
+
+        $delayMs = max(0, (int) config('osm-import.request_delay_ms', 0));
+        $total = count($ids);
+
+        foreach ($ids as $index => $osmid) {
             try {
                 $report->addOutcome($this->importSingleNode($osmid, $appId, $userId, $dryRun, $global, $hasGlobalColumn));
             } catch (\Throwable $e) {
@@ -53,6 +65,10 @@ class OsmPoiImporter
                     'exception' => $e::class,
                 ]);
                 $report->addFailure($osmid, $message, $category);
+            }
+
+            if ($delayMs > 0 && $index < $total - 1) {
+                usleep($delayMs * 1000);
             }
         }
 
@@ -184,11 +200,6 @@ class OsmPoiImporter
     }
 
     /**
-     * @return array{0: array<string, mixed>, 1: array<string, mixed>}
-     *
-     * @throws OsmClientException Se l'endpoint OSM non risponde JSON valido o il node non esiste.
-     */
-    /**
      * Record già importato dallo stesso node OSM: prima `properties->osmid` (JSON, utile se la
      * colonna `osmid` non è valorizzata), poi la colonna `ec_pois.osmid`.
      */
@@ -208,6 +219,11 @@ class OsmPoiImporter
         return EcPoi::query()->where('osmid', $osmid)->first();
     }
 
+    /**
+     * @return array{0: array<string, mixed>, 1: array<string, mixed>}
+     *
+     * @throws OsmClientException Se l'endpoint OSM non risponde JSON valido o il node non esiste.
+     */
     private function fetchOsmNode(int $osmid): array
     {
         try {

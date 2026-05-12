@@ -4,13 +4,14 @@ declare(strict_types=1);
 
 namespace App\Nova\Actions;
 
-use App\Models\User;
-use App\Services\Osm\ImportReport;
+use App\Services\Osm\OsmImportReportPresenter;
+use App\Services\Osm\OsmImportReportStore;
 use App\Services\Osm\OsmPoiImporter;
 use Illuminate\Bus\Queueable;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Collection;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Auth;
 use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Laravel\Nova\Fields\Boolean;
@@ -18,17 +19,31 @@ use Laravel\Nova\Fields\Select;
 use Laravel\Nova\Fields\Textarea;
 use Laravel\Nova\Http\Requests\NovaRequest;
 use Wm\WmPackage\Models\App;
+use Wm\WmPackage\Models\User;
 
 /**
  * Importa POI (`EcPoi`) a partire da OSMID di tipo `node` separati da virgola.
  *
  * Testi UI: chiavi inglesi con {@see __()} e traduzioni in `lang/{it,en,fr,es,de}.json`.
- * UI: textarea + select app (se più di una) + utente obbligatorio (ricercabile) + global + dry-run.
- * Logica: delegata interamente a {@see OsmPoiImporter}.
+ *
+ * UI: textarea + select app + global + dry-run. L'utente proprietario dei POI non viene scelto
+ * dall'operatore ma derivato da {@see App::$user_id} dell'app selezionata.
+ *
+ * Al termine (anche dry-run) la risposta è un redirect alla pagina di report interna (stessa scheda),
+ * senza toast né popup esterni.
+ *
+ * Visibilità app:
+ *  - utente con email {@see self::SUPER_USER_EMAIL} → tutte le app
+ *  - altri utenti → solo le app di cui sono `user_id` (relazione {@see User::apps()})
+ *
+ * Select App: prima app (per nome) pre-selezionata; se l’utente ne vede una sola, la select è in sola lettura.
  */
 class ImportEcPoiFromOsm extends Action
 {
     use InteractsWithQueue, Queueable;
+
+    /** Email autorizzata a vedere tutte le app nella select (vedi @AbstractAuthorableObserver). */
+    private const SUPER_USER_EMAIL = 'team@webmapp.it';
 
     public $standalone = true;
 
@@ -53,70 +68,23 @@ class ImportEcPoiFromOsm extends Action
             return Action::danger(__('No valid OSM IDs found. Enter numeric IDs separated by commas.'));
         }
 
-        $appId = $this->resolveAppId($fields);
-        if ($appId === null) {
+        $app = $this->resolveApp($fields);
+        if ($app === null) {
             return Action::danger(__('No app selected or available.'));
         }
 
-        $userId = $this->resolveUserId($fields);
+        $userId = $app->user_id !== null ? (int) $app->user_id : null;
         $dryRun = (bool) $fields->get('dry_run');
         $global = (bool) $fields->get('global', true);
 
         /** @var OsmPoiImporter $importer */
         $importer = app(OsmPoiImporter::class);
-        $report = $importer->importNodes($osmIds, $appId, $userId, $dryRun, $global);
+        $report = $importer->importNodes($osmIds, (int) $app->id, $userId, $dryRun, $global);
 
-        $message = $this->buildSummaryMessage($report, count($osmIds));
+        $payload = OsmImportReportPresenter::payload($report, count($osmIds));
+        $token = OsmImportReportStore::put($payload, (int) Auth::id());
 
-        if ($report->failuresCount() > 0 && ($report->createdCount() + $report->updatedCount()) === 0) {
-            return Action::danger($message);
-        }
-
-        return Action::message($message);
-    }
-
-    /**
-     * Costruisce un messaggio riassuntivo con: importati / aggiornati / skippati raggruppati per
-     * categoria + i primi OSMID che hanno fallito (max 5), così l'utente capisce subito cosa
-     * non è stato importato.
-     */
-    private function buildSummaryMessage(ImportReport $report, int $requested): string
-    {
-        $prefix = $report->dryRun ? __('[DRY-RUN] ') : '';
-
-        $lines = [];
-        $lines[] = $prefix.__('Requested :req OSM IDs. Created :created, updated :updated, skipped :fail.', [
-            'req' => $requested,
-            'created' => $report->createdCount(),
-            'updated' => $report->updatedCount(),
-            'fail' => $report->failuresCount(),
-        ]);
-
-        if ($report->newTaxonomiesCount() > 0) {
-            $lines[] = __('New taxonomies created: :tax.', ['tax' => $report->newTaxonomiesCount()]);
-        }
-
-        $byCategory = $report->failuresByCategory();
-        if ($byCategory !== []) {
-            $parts = [];
-            foreach ($byCategory as $category => $count) {
-                $label = __(ImportReport::CATEGORY_LABELS[$category] ?? $category);
-                $parts[] = "{$label}: {$count}";
-            }
-            $lines[] = __('Skip reasons — ').implode(' · ', $parts);
-        }
-
-        if ($report->failuresCount() > 0) {
-            $firstErrors = array_slice($report->failures(), 0, 5);
-            $ids = collect($firstErrors)
-                ->map(static fn ($f) => 'node/'.$f['osmid'])
-                ->implode(', ');
-            $more = $report->failuresCount() - count($firstErrors);
-            $suffix = $more > 0 ? ' '.__('(and :count more)', ['count' => $more]) : '';
-            $lines[] = __('OSM IDs not imported (first): ').$ids.$suffix;
-        }
-
-        return implode(' — ', $lines);
+        return Action::redirect(route('osm.import.report', ['token' => $token]));
     }
 
     public function fields(NovaRequest $request): array
@@ -124,32 +92,28 @@ class ImportEcPoiFromOsm extends Action
         $fields = [
             Textarea::make(__('OSM node IDs (comma-separated)'), 'osm_ids')
                 ->rows(4)
-                ->help(__('Example: 12345, 67890, 11223. OSM nodes only (points).').' '.__('If an OSM ID was already imported, its POI will be updated.'))
+                ->help(__('Example: 12345, 67890, 11223. OSM nodes only (points).') . ' ' . __('If an OSM ID was already imported, its POI will be updated.'))
                 ->rules('required', 'string', 'max:10000'),
         ];
 
-        $apps = App::query()->orderBy('id')->get();
-        if ($apps->count() > 1) {
-            $fields[] = Select::make(__('App'), 'app_id')
-                ->options($apps->pluck('name', 'id')->toArray())
-                ->rules('required')
-                ->displayUsingLabels();
-        }
+        $apps = $this->visibleAppsFor($request->user())->orderBy('name')->get();
 
-        $usersForSelect = User::query()
-            ->orderBy('name')
-            ->get(['id', 'name', 'email']);
-
-        $userOptions = $usersForSelect->mapWithKeys(
-            static fn (User $u): array => [$u->id => "{$u->name} ({$u->email})"]
-        )->all();
-
-        $fields[] = Select::make(__('User'), 'user_id')
-            ->options($userOptions)
+        $appSelect = Select::make(__('App'), 'app_id')
+            ->options($apps->pluck('name', 'id')->toArray())
+            ->rules('required')
             ->searchable()
             ->displayUsingLabels()
-            ->help(__('POI owner (required).'))
-            ->rules('required', 'integer', Rule::exists(User::class, 'id'));
+            ->help(__('The POI owner is automatically set to the user_id of the selected app.'));
+
+        if ($apps->isNotEmpty()) {
+            $appSelect->default($apps->first()->id);
+        }
+
+        if ($apps->count() === 1) {
+            $appSelect->readonly();
+        }
+
+        $fields[] = $appSelect;
 
         $fields[] = Boolean::make(__('Include in app pois.geojson (EcPoi.global = true)'), 'global')
             ->default(true)
@@ -160,6 +124,26 @@ class ImportEcPoiFromOsm extends Action
             ->help(__('When enabled, data is fetched and the outcome is shown without persisting any changes.'));
 
         return $fields;
+    }
+
+    /**
+     * Query delle app visibili all'utente corrente:
+     *  - `team@webmapp.it` (e Administrator) → tutte le app;
+     *  - altri utenti → solo quelle di cui sono proprietari (`apps.user_id = user.id`).
+     */
+    private function visibleAppsFor(?User $user): Builder
+    {
+        $query = App::query();
+
+        if ($user === null) {
+            return $query->whereRaw('1 = 0');
+        }
+
+        if ($user->email === self::SUPER_USER_EMAIL || $user->hasRole('Administrator')) {
+            return $query;
+        }
+
+        return $query->where('user_id', $user->id);
     }
 
     /**
@@ -179,23 +163,22 @@ class ImportEcPoiFromOsm extends Action
         return array_values(array_unique($ids));
     }
 
-    private function resolveAppId(ActionFields $fields): ?int
+    /**
+     * Risolve l'app: dal campo `app_id` selezionato, oppure auto-selezione se l'utente vede una sola app.
+     * Garantisce inoltre che l'app sia tra quelle visibili (no bypass via form tampering).
+     */
+    private function resolveApp(ActionFields $fields): ?App
     {
+        $user = Auth::user();
+        $visible = $this->visibleAppsFor($user instanceof User ? $user : null);
+
         $appIdFromField = $fields->get('app_id');
         if (! empty($appIdFromField)) {
-            return (int) $appIdFromField;
+            return $visible->where('id', (int) $appIdFromField)->first();
         }
 
-        $apps = App::query()->orderBy('id')->limit(2)->get();
-        if ($apps->count() === 1) {
-            return (int) $apps->first()->id;
-        }
+        $apps = (clone $visible)->limit(2)->get();
 
-        return null;
-    }
-
-    private function resolveUserId(ActionFields $fields): int
-    {
-        return (int) $fields->get('user_id');
+        return $apps->count() === 1 ? $apps->first() : null;
     }
 }

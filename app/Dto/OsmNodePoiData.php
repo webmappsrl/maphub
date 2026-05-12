@@ -46,6 +46,7 @@ readonly class OsmNodePoiData
         'healthcare',
         'highway',
         'historic',
+        'information',
         'landuse',
         'leisure',
         'man_made',

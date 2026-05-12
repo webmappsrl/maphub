@@ -78,7 +78,7 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
 
         return new self(
             description: self::extractTranslated($tags, 'description'),
-            excerpt: null,
+            excerpt: self::extractTranslated($tags, 'inscription'),
             out_source_feature_id: isset($tags['ref']) && $tags['ref'] !== '' ? $tags['ref'] : null,
             addr_complete: self::buildCompleteAddress($tags),
             capacity: $capacityInt,

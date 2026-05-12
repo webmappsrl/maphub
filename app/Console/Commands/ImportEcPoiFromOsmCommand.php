@@ -17,13 +17,14 @@ use Wm\WmPackage\Models\App;
  *   php artisan maphub:import-ec-pois-from-osm 12345 --app=1 --dry-run
  *   php artisan maphub:import-ec-pois-from-osm @osmids.txt --app=1
  *   php artisan maphub:import-ec-pois-from-osm 12345 --app=2 --no-global
+ *
+ * L\'utente proprietario dei POI è {@see App::$user_id} dell\'app (come la Nova Action).
  */
 class ImportEcPoiFromOsmCommand extends Command
 {
     protected $signature = 'maphub:import-ec-pois-from-osm
         {osmids : OSMID di node separati da virgola, oppure "@/path/file.txt" per leggere da file}
         {--app= : ID dell\'App di destinazione (auto se esiste una sola App)}
-        {--user= : ID utente proprietario (default: nessuno)}
         {--dry-run : Esegue senza persistere; mostra solo cosa farebbe}
         {--no-global : Imposta EcPoi.global=false (esclusi dal pois.geojson; default: global true)}';
 
@@ -38,14 +39,21 @@ class ImportEcPoiFromOsmCommand extends Command
             return self::INVALID;
         }
 
-        $appId = $this->resolveAppId();
-        if ($appId === null) {
+        $appOption = $this->option('app');
+        $app = $this->resolveApp();
+        if ($app === null) {
+            if ($appOption !== null && $appOption !== '') {
+                $this->error("Nessuna App con ID {$appOption}.");
+
+                return self::INVALID;
+            }
             $this->error('Specificare --app=ID; sono presenti più App nel database.');
 
             return self::INVALID;
         }
 
-        $userId = $this->option('user') !== null ? (int) $this->option('user') : null;
+        $appId = (int) $app->id;
+        $userId = $app->user_id !== null ? (int) $app->user_id : null;
         $dryRun = (bool) $this->option('dry-run');
         $global = ! (bool) $this->option('no-global');
 
@@ -96,16 +104,16 @@ class ImportEcPoiFromOsmCommand extends Command
         return array_values(array_unique($ids));
     }
 
-    private function resolveAppId(): ?int
+    private function resolveApp(): ?App
     {
         $option = $this->option('app');
         if ($option !== null && $option !== '') {
-            return (int) $option;
+            return App::query()->find((int) $option);
         }
 
         $apps = App::query()->orderBy('id')->limit(2)->get();
         if ($apps->count() === 1) {
-            return (int) $apps->first()->id;
+            return $apps->first();
         }
 
         return null;
@@ -114,7 +122,7 @@ class ImportEcPoiFromOsmCommand extends Command
     private function renderReport(ImportReport $report): void
     {
         $rows = array_map(
-            static fn ($o) => [
+            static fn($o) => [
                 $o['osmid'],
                 $o['action'],
                 $o['ec_poi_id'] ?? '-',
@@ -126,6 +134,13 @@ class ImportEcPoiFromOsmCommand extends Command
 
         if ($rows !== []) {
             $this->table(['OSMID', 'Action', 'EcPoi ID', 'Taxonomy', 'New Taxonomy?'], $rows);
+        }
+
+        if ($report->truncatedBeyondLimit() > 0) {
+            $this->warn(sprintf(
+                'Attenzione: %d OSMID non processati (limite OSM_IMPORT_MAX_IDS_PER_RUN). Esegui un altro import con gli ID rimanenti.',
+                $report->truncatedBeyondLimit(),
+            ));
         }
 
         if ($report->failuresCount() > 0) {
