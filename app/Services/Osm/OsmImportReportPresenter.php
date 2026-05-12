@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Services\Osm;
 
 /**
- * Serializza {@see ImportReport} per la vista HTML del report post-import.
+ * Serializes {@see ImportReport} for the post-import HTML report view.
  *
  * @phpstan-type CategoryRow array{label: string, count: int}
  * @phpstan-type FailureRow array{node: string, osm_url: string, message: string, category: string}

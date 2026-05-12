@@ -22,34 +22,34 @@ use Wm\WmPackage\Models\App;
 use Wm\WmPackage\Models\User;
 
 /**
- * Importa POI (`EcPoi`) a partire da OSMID di tipo `node` separati da virgola.
+ * Imports {@see \Wm\WmPackage\Models\EcPoi} records from comma-separated OSM node IDs.
  *
- * Testi UI: chiavi inglesi con {@see __()} e traduzioni in `lang/{it,en,fr,es,de}.json`.
+ * UI copy: English keys with {@see __()} and translations in `lang/{it,en,fr,es,de}.json`.
  *
- * UI: textarea + select app + global + dry-run. L'utente proprietario dei POI non viene scelto
- * dall'operatore ma derivato da {@see App::$user_id} dell'app selezionata.
+ * UI: textarea + app select + global + dry-run. POI owner is not chosen manually; it comes from
+ * {@see App::$user_id} on the selected app.
  *
- * Al termine (anche dry-run) la risposta è un redirect alla pagina di report interna (stessa scheda),
- * senza toast né popup esterni.
+ * After completion (including dry-run), response is a redirect to the internal report page
+ * (same tab), without external toasts or popups.
  *
- * Visibilità app:
- *  - utente con email {@see self::SUPER_USER_EMAIL} → tutte le app
- *  - altri utenti → solo le app di cui sono `user_id` (relazione {@see User::apps()})
+ * App visibility:
+ *  - user with email {@see self::SUPER_USER_EMAIL} → all apps
+ *  - other users → only apps where they are `user_id` ({@see User::apps()})
  *
- * Select App: prima app (per nome) pre-selezionata; se l’utente ne vede una sola, la select è in sola lettura.
+ * App select: first app (by name) is pre-selected; when the user sees only one app, the select is read-only.
  */
 class ImportEcPoiFromOsm extends Action
 {
     use InteractsWithQueue, Queueable;
 
-    /** Email autorizzata a vedere tutte le app nella select (vedi @AbstractAuthorableObserver). */
+    /** Email allowed to see every app in the select (see @AbstractAuthorableObserver). */
     private const SUPER_USER_EMAIL = 'team@webmapp.it';
 
     public $standalone = true;
 
     public function __construct()
     {
-        // Stringhe inglesi: Nova applica `Nova::__()` in serializzazione (locale utente corretto).
+        // English strings: Nova applies `Nova::__()` on serialization (correct user locale).
         $this->confirmText = 'Data will be downloaded from openstreetmap.org for each OSM ID. Continue?';
         $this->confirmButtonText = 'Import';
     }
@@ -127,9 +127,9 @@ class ImportEcPoiFromOsm extends Action
     }
 
     /**
-     * Query delle app visibili all'utente corrente:
-     *  - `team@webmapp.it` (e Administrator) → tutte le app;
-     *  - altri utenti → solo quelle di cui sono proprietari (`apps.user_id = user.id`).
+     * Apps visible to the current user:
+     *  - `team@webmapp.it` (and Administrator) → all apps;
+     *  - others → only apps they own (`apps.user_id = user.id`).
      */
     private function visibleAppsFor(?User $user): Builder
     {
@@ -164,8 +164,8 @@ class ImportEcPoiFromOsm extends Action
     }
 
     /**
-     * Risolve l'app: dal campo `app_id` selezionato, oppure auto-selezione se l'utente vede una sola app.
-     * Garantisce inoltre che l'app sia tra quelle visibili (no bypass via form tampering).
+     * Resolves the app from the selected `app_id`, or auto-selection when the user sees only one app.
+     * Ensures the app is among visible apps (no bypass via tampered form data).
      */
     private function resolveApp(ActionFields $fields): ?App
     {

@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Services\Osm;
 
 /**
- * Aggregato di esiti di un'esecuzione di {@see OsmPoiImporter::importNodes()}.
+ * Aggregates outcomes of a single {@see OsmPoiImporter::importNodes()} run.
  *
- * Non è un readonly DTO perché viene popolato incrementalmente durante l'iterazione;
- * lo stato resta confinato all'importer (mutazioni solo via i metodi pubblici).
+ * Not a readonly DTO: it is filled incrementally during iteration; state is
+ * owned by the importer (mutations only through public methods).
  */
 class ImportReport
 {
@@ -19,8 +19,8 @@ class ImportReport
     private array $failures = [];
 
     /**
-     * Etichette delle categorie di errore (stringhe inglesi passate a {@see __()}).
-     * Traduzioni: `lang/{locale}.json` dell’app (it, en, fr, es, de).
+     * Human-readable error category labels (English strings passed to {@see __()}).
+     * Translations live in the app `lang/{locale}.json` files (it, en, fr, es, de).
      *
      * @var array<string, string>
      */
@@ -32,7 +32,7 @@ class ImportReport
         'other' => 'Other error',
     ];
 
-    /** Numero di OSMID non processati perché superato {@see config('osm-import.max_ids_per_run')}. */
+    /** Count of OSM IDs not processed because {@see config('osm-import.max_ids_per_run')} was exceeded. */
     private int $truncatedBeyondLimit = 0;
 
     public function __construct(public readonly bool $dryRun) {}
@@ -77,7 +77,7 @@ class ImportReport
     }
 
     /**
-     * Conteggi raggruppati per categoria (es. ['no_tags' => 12, 'not_found_or_invalid_osm' => 9]).
+     * Failure counts grouped by category (e.g. ['no_tags' => 12, 'not_found_or_invalid_osm' => 9]).
      *
      * @return array<string, int>
      */

@@ -4,26 +4,22 @@ declare(strict_types=1);
 
 namespace App\Dto;
 
-use App\Models\EcPoi;
 use Wm\WmPackage\Dto\EcPoiPropertiesData;
 use Wm\WmPackage\Http\Clients\OsmClient;
 
 /**
- * Data Transfer Object: rappresentazione normalizzata di un node OSM
- * pronta a essere mappata su un {@see EcPoi} (estende EcPoi del wm-package).
+ * DTO: normalized representation of an OSM node ready to map onto {@see \Wm\WmPackage\Models\EcPoi}.
  *
- * Pattern allineato a {@see EcPoiPropertiesData}: classe readonly,
- * immutabile, con factory `fromOsmJson()` che incapsula il parsing del JSON v0.6.
+ * Same pattern as {@see EcPoiPropertiesData}: readonly immutable class with a factory that parses OSM data.
  *
- * I tag OSM presi in considerazione per derivare la coppia
- * (chiave-OSM, valore-OSM) usata come "poi type" sono in {@see self::POI_TYPE_TAG_KEYS},
- * in ordine alfabetico: la prima chiave presente sui tag del node vince.
+ * OSM tags considered for the (key, value) pair used as "POI type" are listed in {@see self::POI_TYPE_TAG_KEYS},
+ * in alphabetical order: the first key present on the node wins.
  */
 readonly class OsmNodePoiData
 {
     /**
-     * Chiavi tag OSM accettate per derivare il TaxonomyPoiType.
-     * Ordine alfabetico: la prima chiave presente (e non vuota / non "no") vince.
+     * OSM tag keys used to derive TaxonomyPoiType.
+     * Alphabetical order: first present key (non-empty, not "no") wins.
      *
      * @var list<string>
      */
@@ -70,14 +66,14 @@ readonly class OsmNodePoiData
     ];
 
     /**
-     * @param  int  $osmid  Id numerico del node OSM (senza prefisso "node/").
-     * @param  array<string, string>  $nameTranslations  Mappa locale ⇒ name (es. ['it' => 'Belvedere', 'en' => 'Viewpoint']).
-     * @param  float  $lat  Latitudine WGS84.
-     * @param  float  $lng  Longitudine WGS84.
-     * @param  string|null  $poiTypeOsmKey  Chiave OSM scelta come classificante (es. "tourism"), null se non classificato.
-     * @param  string|null  $poiTypeOsmValue  Valore OSM scelto (es. "viewpoint"), null se non classificato.
-     * @param  array<string, string>  $rawTags  Tags OSM completi (per audit/debug nelle properties).
-     * @param  string|null  $sourceUpdatedAt  Timestamp "_updated_at" calcolato da OsmClient.
+     * @param  int  $osmid  Numeric OSM node ID (without the "node/" prefix).
+     * @param  array<string, string>  $nameTranslations  Locale => name (e.g. ['it' => 'Belvedere', 'en' => 'Viewpoint']).
+     * @param  float  $lat  WGS84 latitude.
+     * @param  float  $lng  WGS84 longitude.
+     * @param  string|null  $poiTypeOsmKey  OSM key chosen as classifier (e.g. "tourism"), null if none.
+     * @param  string|null  $poiTypeOsmValue  OSM value chosen (e.g. "viewpoint"), null if none.
+     * @param  array<string, string>  $rawTags  Full OSM tags (for audit/debug in properties).
+     * @param  string|null  $sourceUpdatedAt  "_updated_at" timestamp from OsmClient.
      */
     public function __construct(
         public int $osmid,
@@ -91,21 +87,21 @@ readonly class OsmNodePoiData
     ) {}
 
     /**
-     * Factory: costruisce il DTO a partire dalla risposta di {@see OsmClient::getPropertiesAndGeometry()}
-     * per un node OSM. La firma è strettamente quella di un node (geometry "Point"); accettare way/relation
-     * richiederebbe una strategia di centroide separata e non è scopo di questo importer.
+     * Factory: builds the DTO from {@see OsmClient::getPropertiesAndGeometry()} for an OSM node.
+     * Strictly requires a node (GeoJSON Point geometry); ways/relations would need a separate centroid strategy
+     * and are out of scope for this importer.
      *
-     * @param  array<string, mixed>  $properties  Tags + chiavi tecniche ("_updated_at", ...) restituite da OsmClient.
-     * @param  array<string, mixed>  $geometry  Geometry GeoJSON Point (validata difensivamente).
+     * @param  array<string, mixed>  $properties  Tags plus technical keys ("_updated_at", …) from OsmClient.
+     * @param  array<string, mixed>  $geometry  GeoJSON Point geometry (defensively validated).
      *
-     * @throws \InvalidArgumentException Quando la geometry non è un Point valido.
+     * @throws \InvalidArgumentException When geometry is not a valid Point.
      */
     public static function fromOsmNode(int $osmid, array $properties, array $geometry): self
     {
         $type = $geometry['type'] ?? null;
         $coordinates = $geometry['coordinates'] ?? null;
         if ($type !== 'Point' || ! is_array($coordinates) || ! isset($coordinates[0], $coordinates[1])) {
-            throw new \InvalidArgumentException("OSM node {$osmid}: geometry non è un Point valido.");
+            throw new \InvalidArgumentException("OSM node {$osmid}: geometry is not a valid Point.");
         }
 
         $lng = (float) $coordinates[0];
@@ -136,7 +132,7 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Nome principale (default = italiano, fallback al primo disponibile, infine all'OSMID).
+     * Primary display name (defaults to Italian, then first available locale, then OSM node id).
      */
     public function primaryName(): string
     {
@@ -149,8 +145,8 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Identifier "umano" candidato per il TaxonomyPoiType, costruito come "chiave-valore"
-     * (es. "tourism-viewpoint"). Restituisce null se il node non ha un tag classificante.
+     * Composite identifier candidate for TaxonomyPoiType as "key-value" (e.g. "tourism-viewpoint").
+     * Returns null when the node has no classifying tag.
      */
     public function poiTypeCompositeIdentifier(): ?string
     {
@@ -162,8 +158,8 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Normalizza un identifier per il confronto/persistenza: lowercase, trim,
-     * spazi/underscore in trattini, caratteri non alfanumerici (eccetto "-") rimossi.
+     * Normalizes an identifier for comparison/persistence: lowercase, trim,
+     * spaces/underscores to hyphens, strip non-alphanumeric characters (except "-").
      */
     public static function normalizeIdentifier(string $value): string
     {
@@ -175,12 +171,12 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Restituisce gli attributi pronti per {@see \Wm\WmPackage\Models\EcPoi::create()}.
-     * Il name resta translatable: viene impostato via setTranslation lato caller.
+     * Attributes ready for {@see \Wm\WmPackage\Models\EcPoi::create()}.
+     * `name` stays translatable: set via setTranslation on the caller side.
      *
-     * Il blocco `properties` è prodotto dal DTO {@see OsmEcPoiPropertiesData} a partire dai tag OSM:
-     * mappa le chiavi standard (contact_email, contact_phone, opening_hours, addr_*, related_url, ...)
-     * e conserva i tag grezzi sotto `properties.osm.tags` per audit/debug.
+     * The `properties` block is produced by {@see OsmEcPoiPropertiesData} from OSM tags:
+     * maps standard keys (contact_email, contact_phone, opening_hours, addr_*, related_url, …)
+     * and keeps raw tags under `properties.osm_data.tags` for audit/debug.
      *
      * @return array<string, mixed>
      */
@@ -204,10 +200,10 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Costruisce il DTO delle properties usando i tag OSM.
-     * La struttura risultante è allineata alla convenzione wm-package:
-     *  - `properties.osmid` → ID numerico top-level (compatibile con query SQL / EcTrackService)
-     *  - `properties.osm_data` → blocco audit con `type`, `source_updated_at`, `tags`
+     * Builds the properties DTO from OSM tags.
+     * Resulting shape follows wm-package conventions:
+     *  - `properties.osmid` → numeric top-level id (SQL-friendly / EcTrackService)
+     *  - `properties.osm_data` → audit block with `type`, `source_updated_at`, `tags`
      */
     public function toEcPoiProperties(): OsmEcPoiPropertiesData
     {
@@ -223,7 +219,7 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Sceglie la coppia (chiave, valore) OSM da usare come classificante.
+     * Picks the (key, value) OSM pair used as classifier.
      *
      * @param  array<string, string>  $tags
      * @return array{0: ?string, 1: ?string}
@@ -240,9 +236,8 @@ readonly class OsmNodePoiData
     }
 
     /**
-     * Estrae le traduzioni del name dai tag OSM (`name`, `name:it`, `name:en`, ...).
-     * Se OSM non fornisce alcun `name*`, ritorna array vuoto: il fallback (es. nome della
-     * tassonomia matchata) è responsabilità del chiamante.
+     * Extracts name translations from OSM tags (`name`, `name:it`, `name:en`, …).
+     * If OSM provides no `name*`, returns an empty array: taxonomy name fallback is the caller's job.
      *
      * @param  array<string, string>  $tags
      * @return array<string, string>

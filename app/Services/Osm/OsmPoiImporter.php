@@ -15,13 +15,13 @@ use Wm\WmPackage\Models\EcPoi;
 use Wm\WmPackage\Models\TaxonomyPoiType;
 
 /**
- * Servizio di alto livello: dato un set di OSMID di tipo `node`,
- * scarica i dati da OpenStreetMap (via {@see OsmClient}), li normalizza in {@see OsmNodePoiData}
- * e crea/aggiorna gli {@see EcPoi} associando il {@see TaxonomyPoiType} corretto.
- * Testi lunghi (description, excerpt da inscription) restano nel JSON {@see EcPoi::$properties}
- * perché lo schema DB del progetto non espone colonne dedicate per quelle chiavi.
+ * High-level service: given a set of OSM node IDs, fetches data from OpenStreetMap
+ * (via {@see OsmClient}), normalizes it into {@see OsmNodePoiData}, and creates/updates
+ * {@see EcPoi} records with the correct {@see TaxonomyPoiType}.
+ * Long-form text (description, excerpt from inscription) stays in the {@see EcPoi::$properties}
+ * JSON because this project's DB schema has no dedicated columns for those keys.
  *
- * Modalità dry-run: nessuna persistenza, ritorna l'esito atteso utile per validazione interattiva (Nova/CLI).
+ * Dry-run mode: no persistence; returns the expected outcome for interactive validation (Nova/CLI).
  */
 class OsmPoiImporter
 {
@@ -31,13 +31,13 @@ class OsmPoiImporter
     ) {}
 
     /**
-     * Importa una lista di OSMID (node).
+     * Imports a list of OSM node IDs.
      *
-     * @param  list<int|string>  $osmIds  Identificativi numerici dei node OSM (verranno castati a int).
-     * @param  int  $appId  ID dell'App di destinazione (campo obbligatorio sullo schema `ec_pois`).
-     * @param  int|null  $userId  Utente proprietario (opzionale).
-     * @param  bool  $dryRun  Se true non persiste nulla.
-     * @param  bool  $global  Se la colonna `ec_pois.global` esiste: valore da impostare (true = inclusi in {@see \Wm\WmPackage\Models\App::getAllPoisGeojson()} / pois.geojson).
+     * @param  list<int|string>  $osmIds  Numeric OSM node IDs (cast to int).
+     * @param  int  $appId  Destination app ID (required on `ec_pois` schema).
+     * @param  int|null  $userId  Owning user ID (optional).
+     * @param  bool  $dryRun  When true, nothing is persisted.
+     * @param  bool  $global  When `ec_pois.global` exists: value to set (true = included in {@see \Wm\WmPackage\Models\App::getAllPoisGeojson()} / pois.geojson).
      */
     public function importNodes(array $osmIds, int $appId, ?int $userId = null, bool $dryRun = false, bool $global = true): ImportReport
     {
@@ -76,26 +76,26 @@ class OsmPoiImporter
     }
 
     /**
-     * Trasforma un'eccezione (anche TypeError dovuto a body non-JSON da OSM) in una coppia
-     * (categoria, messaggio in italiano) leggibile per l'utente.
+     * Maps an exception (including TypeError from non-JSON OSM responses) to a
+     * (category, human-readable message) pair for the report.
      *
      * @return array{0: string, 1: string}
      */
     private function classifyFailure(int $osmid, \Throwable $e): array
     {
         if ($e instanceof OsmClientExceptionNoTags) {
-            return ['no_tags', "node/{$osmid}: nessun tag su OpenStreetMap, niente da importare."];
+            return ['no_tags', "node/{$osmid}: no tags on OpenStreetMap; nothing to import."];
         }
         $message = $e->getMessage();
         if ($this->looksLikeStorageMisconfiguration($message)) {
             return [
                 'storage',
-                "node/{$osmid}: dopo il salvataggio l'observer ha tentato di aggiornare pois.geojson su S3/MinIO (disk wmfe) ma la configurazione è incompleta. Imposta almeno AWS_DEFAULT_REGION (es. us-east-1 o eu-central-1), AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY e, in locale, AWS_ENDPOINT per MinIO. Vedi .env-example.",
+                "node/{$osmid}: after save, the observer tried to update pois.geojson on S3/MinIO (wmfe disk) but configuration is incomplete. Set at least AWS_DEFAULT_REGION (e.g. us-east-1 or eu-central-1), AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and for local dev AWS_ENDPOINT for MinIO. See .env-example.",
             ];
         }
         if ($e instanceof \InvalidArgumentException) {
             if (str_contains($message, 'Point') || str_contains($message, 'geometry')) {
-                return ['geometry', "node/{$osmid}: geometria OSM non valida."];
+                return ['geometry', "node/{$osmid}: invalid OSM geometry."];
             }
 
             return ['other', "node/{$osmid}: {$message}"];
@@ -104,16 +104,16 @@ class OsmPoiImporter
             return ['not_found_or_invalid_osm', "node/{$osmid}: ".$e->getMessage()];
         }
         if ($e instanceof \TypeError) {
-            // Tipico: api.openstreetmap.org risponde con body non JSON (404/410 o errore intermittente).
-            return ['not_found_or_invalid_osm', "node/{$osmid}: non trovato su OpenStreetMap o risposta non valida."];
+            // Typical: api.openstreetmap.org returns a non-JSON body (404/410 or intermittent errors).
+            return ['not_found_or_invalid_osm', "node/{$osmid}: not found on OpenStreetMap or invalid response."];
         }
 
         return ['other', "node/{$osmid}: ".$message];
     }
 
     /**
-     * Dopo un import reale, EcPoiObserver lancia job/side-effect che usano il disk `wmfe` (S3).
-     * Senza region/credenziali l'AWS SDK lancia InvalidArgumentException: non va confuso con la geometria OSM.
+     * After a real import, EcPoiObserver runs jobs/side effects using the `wmfe` (S3) disk.
+     * Without region/credentials the AWS SDK throws InvalidArgumentException — do not confuse with OSM geometry.
      */
     private function looksLikeStorageMisconfiguration(string $message): bool
     {
@@ -154,7 +154,7 @@ class OsmPoiImporter
             $attrs = $dto->toEcPoiAttributes($appId, $userId);
             unset($attrs['name']);
 
-            // Campi da passare via fill (solo quelli in $fillable)
+            // Only pass fillable attributes (exclude osmid, name, properties).
             $fillable = array_diff_key($attrs, ['osmid' => true, 'name' => true, 'properties' => true]);
 
             if ($existing) {
@@ -200,8 +200,8 @@ class OsmPoiImporter
     }
 
     /**
-     * Record già importato dallo stesso node OSM: prima `properties->osmid` (JSON, utile se la
-     * colonna `osmid` non è valorizzata), poi la colonna `ec_pois.osmid`.
+     * Finds a POI already imported from the same OSM node: first `properties->osmid` (JSON, useful when
+     * the `osmid` column is unset), then `ec_pois.osmid`.
      */
     private function findExistingEcPoiByOsmid(int $osmid): ?EcPoi
     {
@@ -222,38 +222,36 @@ class OsmPoiImporter
     /**
      * @return array{0: array<string, mixed>, 1: array<string, mixed>}
      *
-     * @throws OsmClientException Se l'endpoint OSM non risponde JSON valido o il node non esiste.
+     * @throws OsmClientException When the OSM endpoint does not return valid JSON or the node does not exist.
      */
     private function fetchOsmNode(int $osmid): array
     {
         try {
             $payload = $this->osmClient->getPropertiesAndGeometry("node/{$osmid}");
         } catch (OsmClientException $e) {
-            // Già descritto correttamente dal client (es. OsmClientExceptionNoTags).
+            // Already described by the client (e.g. OsmClientExceptionNoTags).
             throw $e;
         } catch (\TypeError $e) {
-            // OsmClient lancia TypeError quando `Http::get(...)->json()` torna null
-            // (typicamente: HTTP 404/410 con body non JSON per OSMID inesistenti).
-            throw new OsmClientException('non trovato su OpenStreetMap o risposta non valida.');
+            // OsmClient throws TypeError when Http::get(...)->json() returns null
+            // (typically HTTP 404/410 with a non-JSON body for missing OSM IDs).
+            throw new OsmClientException('not found on OpenStreetMap or invalid response.');
         }
 
         if (! isset($payload[0], $payload[1]) || ! is_array($payload[0]) || ! is_array($payload[1])) {
-            throw new OsmClientException('risposta OSM inattesa.');
+            throw new OsmClientException('unexpected OSM response.');
         }
 
         return [$payload[0], $payload[1]];
     }
 
     /**
-     * Imposta le traduzioni del nome.
+     * Sets name translations on the model.
      *
-     * Strategia, in ordine:
-     *  1. Tag OSM (`name`, `name:it`, `name:en`, ...) raccolti in {@see OsmNodePoiData::$nameTranslations}.
-     *  2. Se l'OSM non fornisce alcun `name*`, si usa il nome tradotto del {@see TaxonomyPoiType}
-     *     matchato/creato (es. "Punto panoramico" / "Viewpoint"), così il POI eredita un nome
-     *     coerente con la categoria invece della label OSM titlecased.
-     *  3. Ultimo fallback: {@see OsmNodePoiData::primaryName()} (es. "OSM node 123") per non
-     *     salvare un nome vuoto.
+     * Strategy, in order:
+     *  1. OSM tags (`name`, `name:it`, `name:en`, …) collected in {@see OsmNodePoiData::$nameTranslations}.
+     *  2. If OSM provides no `name*`, use translated names from the matched/created {@see TaxonomyPoiType}
+     *     (e.g. "Viewpoint") so the POI inherits a category-consistent name instead of a titlecased OSM label.
+     *  3. Final fallback: {@see OsmNodePoiData::primaryName()} (e.g. "OSM node 123") to avoid an empty name.
      */
     private function applyNameTranslations(EcPoi $poi, OsmNodePoiData $dto, TaxonomyPoiType $taxonomy): void
     {
@@ -303,9 +301,9 @@ class OsmPoiImporter
     }
 
     /**
-     * Unisce le properties esistenti con quelle dell'import OSM e rimuove chiavi legacy
-     * che altrimenti resterebbero per effetto di {@see array_merge} (es. `related_url_assoc`
-     * prima dell’allineamento al DTO base, oppure il blocco `osm` sostituito da `osm_data` + `osmid`).
+     * Merges existing properties with OSM import properties and drops legacy keys that would
+     * otherwise survive {@see array_merge} (e.g. `related_url_assoc` before DTO alignment, or the
+     * `osm` block replaced by `osm_data` + top-level `osmid`).
      *
      * @param  array<string, mixed>  $existing
      * @param  array<string, mixed>  $import

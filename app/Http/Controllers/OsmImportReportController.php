@@ -13,7 +13,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class OsmImportReportController extends Controller
 {
     /**
-     * Pagina di riepilogo import OSM (stessa scheda del browser, nessun popup esterno).
+     * OSM import summary page (same browser tab; no external popup).
      */
     public function show(Request $request, string $token): View
     {

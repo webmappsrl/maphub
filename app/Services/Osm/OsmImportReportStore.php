@@ -8,7 +8,7 @@ use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Str;
 
 /**
- * Memorizza il payload del report di import OSM per la pagina di riepilogo (token monouso in cache).
+ * Stores the OSM import report payload for the HTML summary page (one-time token in cache).
  */
 final class OsmImportReportStore
 {

@@ -10,31 +10,31 @@ use Illuminate\Support\Str;
 use Wm\WmPackage\Models\TaxonomyPoiType;
 
 /**
- * Risolve un {@see TaxonomyPoiType} a partire dalla coppia (chiave-OSM, valore-OSM) ricavata da {@see OsmNodePoiData}.
+ * Resolves a {@see TaxonomyPoiType} from the (OSM key, OSM value) pair derived from {@see OsmNodePoiData}.
  *
- * Strategia (in ordine):
- *  0. Nessun tag classificante tra quelli noti → fallback sul {@see TaxonomyPoiType} con identifier 'poi'
- *     (esistente in DB, oppure creato al primo import reale se mancante).
- *  1. Match esatto per `identifier` sul valore OSM normalizzato (es. "viewpoint").
- *  2. Match esatto sull'identifier composito "chiave-valore" (es. "tourism-viewpoint").
- *  3. Match case-insensitive con trim (covering legacy identifier salvati con casing diverso).
- *  4. Creazione di un nuovo TaxonomyPoiType con identifier "chiave-valore" e name {it,en} titlecased.
+ * Strategy (in order):
+ *  0. No qualifying tag among known keys → fallback to {@see TaxonomyPoiType} with identifier `poi`
+ *     (existing row, or created on first real import if missing).
+ *  1. Exact match on `identifier` using normalized OSM value (e.g. "viewpoint").
+ *  2. Exact match on composite identifier "key-value" (e.g. "tourism-viewpoint").
+ *  3. Case-insensitive match with trim (covers legacy identifiers with different casing).
+ *  4. Create a new TaxonomyPoiType with identifier "key-value" and titlecased {it,en} names.
  *
- * Tutte le query usano `identifier` indicizzato/unique (vedi migration `create_taxonomy_poi_types_table`).
+ * All queries use the indexed/unique `identifier` column (see `create_taxonomy_poi_types_table` migration).
  */
 class OsmTaxonomyPoiTypeResolver
 {
     /**
-     * Memoizzazione per evitare query ripetute durante un singolo batch di import.
+     * In-memory cache to avoid repeated queries during a single import batch.
      *
      * @var array<string, TaxonomyPoiType|null>
      */
     private array $cache = [];
 
     /**
-     * Restituisce un TaxonomyPoiType esistente o ne crea uno nuovo.
-     * In dry-run, ritorna l'istanza esistente oppure un'istanza non persistita per consentire al chiamante
-     * di sapere quale identifier verrebbe creato.
+     * Returns an existing TaxonomyPoiType or creates a new one.
+     * In dry-run mode, returns the existing instance or a non-persisted instance so the caller
+     * can see which identifier would be created.
      *
      * @return array{taxonomy: TaxonomyPoiType, created: bool}
      */
@@ -74,7 +74,7 @@ class OsmTaxonomyPoiTypeResolver
     }
 
     /**
-     * Cerca per identifier supportando legacy: prima match esatto, poi case-insensitive ignorando spazi/underscore.
+     * Lookup by identifier with legacy support: exact match first, then case-insensitive trim.
      */
     private function findByIdentifier(string $identifier): ?TaxonomyPoiType
     {
@@ -134,8 +134,8 @@ class OsmTaxonomyPoiTypeResolver
     }
 
     /**
-     * Quando il node OSM non ha un tag classificante, usa sempre il {@see TaxonomyPoiType} con identifier 'poi'.
-     * Se non esiste: in import reale viene creato; in dry-run si restituisce un'istanza non persistita e created=true.
+     * When the OSM node has no qualifying classifying tag, always use {@see TaxonomyPoiType} with identifier `poi`.
+     * If missing: created on real import; in dry-run returns a non-persisted instance with created=true.
      *
      * @return array{taxonomy: TaxonomyPoiType, created: bool}
      */
@@ -162,7 +162,7 @@ class OsmTaxonomyPoiTypeResolver
 
             return ['taxonomy' => $taxonomy, 'created' => true];
         } catch (\Throwable) {
-            // Race: un altro processo ha creato "poi" nel frattempo.
+            // Race: another process created `poi` in the meantime.
             $existing = TaxonomyPoiType::query()->where('identifier', 'poi')->firstOrFail();
             $this->cache['poi'] = $existing;
 

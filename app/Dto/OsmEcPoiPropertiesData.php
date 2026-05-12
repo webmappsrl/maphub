@@ -7,28 +7,28 @@ namespace App\Dto;
 use Wm\WmPackage\Dto\EcPoiPropertiesData;
 
 /**
- * DTO project-specific che estende {@see EcPoiPropertiesData} aggiungendo i campi properties
- * effettivamente esposti dalla resource Nova `EcPoi` ma non presenti sul DTO base
- * (`opening_hours`, `addr_locality`, `addr_housenumber`) + dati di provenienza OSM.
+ * Project-specific DTO extending {@see EcPoiPropertiesData} with properties fields
+ * exposed by the Nova `EcPoi` resource but missing on the base DTO
+ * (`opening_hours`, `addr_locality`, `addr_housenumber`) plus OSM provenance.
  *
- * Struttura allineata alla convenzione wm-package (vedi EcTrackService / HasDemClassification):
- *  - `osmid` al top-level di `properties` (field dedicato, leggibile da query SQL dirette)
- *  - `osm_data` al top-level di `properties`: dizionario con `type`, `source_updated_at`, `tags`
+ * Shape follows wm-package conventions (see EcTrackService / HasDemClassification):
+ *  - `osmid` at the top level of `properties` (dedicated field, easy SQL access)
+ *  - `osm_data` at the top level of `properties`: dict with `type`, `source_updated_at`, `tags`
  *
- * Pattern allineato al commento del DTO base: classe readonly, override di `toArray()` che fa
- * `array_merge(parent::toArray(), [...])` per non perdere il filtro dei null.
+ * Same pattern as the base DTO comment: readonly class, `toArray()` override merges
+ * `array_merge(parent::toArray(), [...])` so null filtering from the parent is preserved.
  *
- * Costruito esclusivamente via {@see self::fromOsmTags()}: il caller passa l'array di tag OSM
- * normalizzati e ottiene una mappa pulita di sole chiavi/valori valorizzati.
+ * Built only via {@see self::fromOsmTags()}: caller passes normalized OSM tag strings and gets
+ * a clean map of only non-null values.
  */
 readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
 {
     /**
      * @param  array<string, string>|null  $description
      * @param  array<string, string>|null  $excerpt
-     * @param  array<string, string>|null  $related_url  Mappa "label" ⇒ url (es. ['website' => 'https://...']); passata al parent per serializzazione standard.
-     * @param  array<string, mixed>|null  $osm_data  Blocco audit allineato alla convenzione wm-package.
-     * @param  int|null  $osmid  ID numerico del node OSM, salvato top-level per compatibilità con query SQL.
+     * @param  array<string, string>|null  $related_url  Label => URL map (e.g. ['website' => 'https://...']); passed to parent for standard serialization.
+     * @param  array<string, mixed>|null  $osm_data  Audit block aligned with wm-package conventions.
+     * @param  int|null  $osmid  Numeric OSM node id, stored top-level for SQL compatibility.
      */
     public function __construct(
         ?array $description = null,
@@ -58,10 +58,10 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     }
 
     /**
-     * Factory: derivata dai tag OSM (già normalizzati a string).
+     * Factory from OSM tags (already normalized to strings).
      *
      * @param  array<string, string>  $tags
-     * @param  array<string, mixed>  $audit  Deve contenere `osmid` (int), `type` (string), `source_updated_at` (string|null), `tags` (array).
+     * @param  array<string, mixed>  $audit  Must include `osmid` (int), `type` (string), `source_updated_at` (string|null), `tags` (array).
      */
     public static function fromOsmTags(array $tags, array $audit = []): self
     {
@@ -125,8 +125,8 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     }
 
     /**
-     * Combina addr:street, addr:housenumber, addr:postcode, addr:city in un'unica stringa
-     * "Via Esempio 12, 41023 Lama Mocogno". Restituisce null se non c'è nulla di significativo.
+     * Combines addr:street, addr:housenumber, addr:postcode, addr:city into one string
+     * such as "Via Example 12, 41023 Lama Mocogno". Returns null when nothing meaningful is present.
      *
      * @param  array<string, string>  $tags
      */
@@ -149,7 +149,7 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     }
 
     /**
-     * Estrae i link "esterni" come mappa "label" ⇒ url compatibile con Nova KeyValue.
+     * Extracts external links as a label => URL map compatible with Nova KeyValue.
      *
      * @param  array<string, string>  $tags
      * @return array<string, string>|null
@@ -181,7 +181,7 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     }
 
     /**
-     * Trasforma "en:Title" oppure URL completi in URL Wikipedia canonico.
+     * Turns "en:Title" or full URLs into a canonical Wikipedia URL.
      */
     private static function wikipediaUrl(string $value): string
     {
@@ -196,7 +196,7 @@ readonly class OsmEcPoiPropertiesData extends EcPoiPropertiesData
     }
 
     /**
-     * Estrae traduzioni per `description` / `excerpt` con fallback al tag base.
+     * Extracts translations for `description` / `excerpt` with fallback to the base tag.
      *
      * @param  array<string, string>  $tags
      * @return array<string, string>|null

@@ -6,22 +6,22 @@ return [
 
     /*
     |--------------------------------------------------------------------------
-    | Ritardo tra una richiesta HTTP all’API OSM e la successiva (import POI)
+    | Delay between HTTP requests to the OSM API and the next one (POI import)
     |--------------------------------------------------------------------------
     |
-    | Riduce burst verso api.openstreetmap.org. Valore in millisecondi.
-    | Imposta 0 per disattivare (solo ambienti di test o volumi molto bassi).
+    | Reduces burst traffic to api.openstreetmap.org. Value in milliseconds.
+    | Set to 0 to disable (testing only or very low volumes).
     |
     */
     'request_delay_ms' => max(0, (int) env('OSM_IMPORT_REQUEST_DELAY_MS', 350)),
 
     /*
     |--------------------------------------------------------------------------
-    | Numero massimo di OSMID processati per singola esecuzione dell’import
+    | Maximum number of OSM IDs processed per import run
     |--------------------------------------------------------------------------
     |
-    | Se la lista supera questo valore, gli ID eccedenti vengono ignorati e il
-    | report indica quanti ne sono stati omessi. 0 = nessun limite.
+    | If the list exceeds this value, extra IDs are ignored and the report
+    | shows how many were omitted. 0 means no limit.
     |
     */
     'max_ids_per_run' => max(0, (int) env('OSM_IMPORT_MAX_IDS_PER_RUN', 500)),
