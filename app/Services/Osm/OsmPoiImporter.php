@@ -21,6 +21,11 @@ use Wm\WmPackage\Models\TaxonomyPoiType;
  * Long-form text (description, excerpt from inscription) stays in the {@see EcPoi::$properties}
  * JSON because this project's DB schema has no dedicated columns for those keys.
  *
+ * TODO: Resolve OSM image tags (`image`, `wikimedia_commons`, …) into Spatie Media Library on
+ * {@see EcPoi} (`default` collection: first file = feature image, following = gallery per
+ * {@see \Wm\WmPackage\Http\Resources\EcPoiResource}), e.g. Wikimedia Commons API + `addMediaFromUrl`
+ * (see legacy geohub `UpdatePOIFromOsm` / `ImporterAndSyncTrait`).
+ *
  * Dry-run mode: no persistence; returns the expected outcome for interactive validation (Nova/CLI).
  */
 class OsmPoiImporter
@@ -190,6 +195,9 @@ class OsmPoiImporter
             return $poi;
         });
 
+        // TODO: Sync POI media from OSM (`image`, `wikimedia_commons`, multi-value refs): Commons API,
+        // then attach to EcPoi `default` collection (featured + gallery order).
+
         return [
             'action' => $action,
             'osmid' => $osmid,
@@ -203,7 +211,7 @@ class OsmPoiImporter
      * Finds a POI already imported from the same OSM node: first `properties->osmid` (JSON, useful when
      * the `osmid` column is unset), then `ec_pois.osmid`.
      */
-    private function findExistingEcPoiByOsmid(int $osmid): ?EcPoi
+    protected function findExistingEcPoiByOsmid(int $osmid): ?EcPoi
     {
         $byProperties = EcPoi::query()
             ->where(function ($query) use ($osmid) {
