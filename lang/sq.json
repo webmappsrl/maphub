@@ -1,0 +1,10 @@
+{
+    "Are you sure you want to regenerate pois.geojson for this app? The job will be queued and may take a while.": "Jeni i sigurt që dëshironi të rigjeneroni pois.geojson për këtë aplikacion? Puna do të shtohet në radhë dhe mund të zgjasë.",
+    "Cancel": "Anulo",
+    "Command failed for app :name (ID: :id)": "Komanda dështoi për aplikacionin :name (ID: :id)",
+    "Errors": "Gabime",
+    "No app selected.": "Asnjë aplikacion i zgjedhur.",
+    "Regenerate pois.geojson": "Rigjenero pois.geojson",
+    "Yes, regenerate": "Po, rigjenero",
+    "pois.geojson generation job queued for :count app.": "Puna e gjenerimit të pois.geojson u shtua në radhë për :count aplikacion."
+}

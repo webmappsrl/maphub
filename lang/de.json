@@ -1,0 +1,10 @@
+{
+    "Are you sure you want to regenerate pois.geojson for this app? The job will be queued and may take a while.": "Möchten Sie pois.geojson für diese App wirklich neu generieren? Der Job wird in die Warteschlange gestellt und kann eine Weile dauern.",
+    "Cancel": "Abbrechen",
+    "Command failed for app :name (ID: :id)": "Befehl fehlgeschlagen für App :name (ID: :id)",
+    "Errors": "Fehler",
+    "No app selected.": "Keine App ausgewählt.",
+    "Regenerate pois.geojson": "pois.geojson neu generieren",
+    "Yes, regenerate": "Ja, neu generieren",
+    "pois.geojson generation job queued for :count app.": "Job zur Generierung von pois.geojson für :count App in die Warteschlange gestellt."
+}
