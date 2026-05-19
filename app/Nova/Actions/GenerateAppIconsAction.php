@@ -9,13 +9,13 @@ use Laravel\Nova\Actions\Action;
 use Laravel\Nova\Fields\ActionFields;
 use Wm\WmPackage\Models\App;
 
-class BuildAppPoisGeojsonAction extends Action
+class GenerateAppIconsAction extends Action
 {
     private const TEAM_EMAIL = 'team@webmapp.it';
 
     public function name(): string
     {
-        return __('Regenerate pois.geojson');
+        return __('Regenerate icons.json');
     }
 
     public function authorizedToRun(Request $request, $model): bool
@@ -36,7 +36,7 @@ class BuildAppPoisGeojsonAction extends Action
                 continue;
             }
 
-            $exitCode = Artisan::call('wm:build-pois-geojson', ['app_id' => $app->id]);
+            $exitCode = Artisan::call('wm:generate-icons', ['app_id' => $app->id]);
 
             if ($exitCode !== 0) {
                 $output = trim(Artisan::output());
@@ -54,7 +54,7 @@ class BuildAppPoisGeojsonAction extends Action
             return Action::danger(__('No app selected.'));
         }
 
-        $message = __('pois.geojson generation job queued for :count app.', ['count' => $processedCount]);
+        $message = __('icons.json generated successfully for :count app.', ['count' => $processedCount]);
 
         if ($errors !== []) {
             return Action::danger($message.' '.__('Errors').': '.implode('; ', $errors));

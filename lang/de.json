@@ -1,10 +1,13 @@
 {
+    "Are you sure you want to regenerate icons.json for this app? This operation may take a while.": "Möchten Sie icons.json für diese App wirklich neu generieren? Dieser Vorgang kann eine Weile dauern.",
     "Are you sure you want to regenerate pois.geojson for this app? The job will be queued and may take a while.": "Möchten Sie pois.geojson für diese App wirklich neu generieren? Der Job wird in die Warteschlange gestellt und kann eine Weile dauern.",
     "Cancel": "Abbrechen",
     "Command failed for app :name (ID: :id)": "Befehl fehlgeschlagen für App :name (ID: :id)",
     "Errors": "Fehler",
     "No app selected.": "Keine App ausgewählt.",
+    "Regenerate icons.json": "icons.json neu generieren",
     "Regenerate pois.geojson": "pois.geojson neu generieren",
     "Yes, regenerate": "Ja, neu generieren",
+    "icons.json generated successfully for :count app.": "icons.json erfolgreich für :count App generiert.",
     "pois.geojson generation job queued for :count app.": "Job zur Generierung von pois.geojson für :count App in die Warteschlange gestellt."
 }
