@@ -1,0 +1,10 @@
+{
+    "Create App": "App aanmaken",
+    "Name": "Naam",
+    "Sku": "SKU",
+    "Customer name": "Klantnaam",
+    "Customer or organization name used in the app configuration.": "Naam van de klant of organisatie in de app-configuratie.",
+    "Select the administrator who owns this app.": "Selecteer de beheerder die eigenaar is van deze app.",
+    "Unique app identifier (slug).": "Unieke app-identificatie (slug).",
+    "App name on the stores (App Store and Playstore).": "App-naam in de stores (App Store en Play Store)."
+}

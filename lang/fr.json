@@ -1,0 +1,10 @@
+{
+    "Create App": "Créer l'app",
+    "Name": "Nom",
+    "Sku": "SKU",
+    "Customer name": "Nom du client",
+    "Customer or organization name used in the app configuration.": "Nom du client ou de l'organisation utilisé dans la configuration de l'app.",
+    "Select the administrator who owns this app.": "Sélectionnez l'administrateur propriétaire de cette app.",
+    "Unique app identifier (slug).": "Identifiant unique de l'app (slug).",
+    "App name on the stores (App Store and Playstore).": "Nom de l'app sur les stores (App Store et Play Store)."
+}

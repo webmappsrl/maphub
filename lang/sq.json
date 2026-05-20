@@ -1,0 +1,10 @@
+{
+    "Create App": "Krijo app",
+    "Name": "Emri",
+    "Sku": "SKU",
+    "Customer name": "Emri i klientit",
+    "Customer or organization name used in the app configuration.": "Emri i klientit ose organizatës në konfigurimin e app-it.",
+    "Select the administrator who owns this app.": "Zgjidh administratorin pronar të këtij app-i.",
+    "Unique app identifier (slug).": "Identifikues unik i app-it (slug).",
+    "App name on the stores (App Store and Playstore).": "Emri i app-it në dyqanet (App Store dhe Play Store)."
+}

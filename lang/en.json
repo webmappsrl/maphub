@@ -1,0 +1,10 @@
+{
+    "Create App": "Create App",
+    "Name": "Name",
+    "Sku": "SKU",
+    "Customer name": "Customer name",
+    "Customer or organization name used in the app configuration.": "Customer or organization name used in the app configuration.",
+    "Select the administrator who owns this app.": "Select the administrator who owns this app.",
+    "Unique app identifier (slug).": "Unique app identifier (slug).",
+    "App name on the stores (App Store and Playstore).": "App name on the stores (App Store and Play Store)."
+}
