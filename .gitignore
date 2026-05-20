@@ -26,3 +26,4 @@ yarn-error.log
 build/
 auth.json
 /storage/json/conf/
+/storage/json/pois/

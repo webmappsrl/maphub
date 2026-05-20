@@ -1,0 +1,13 @@
+{
+    "Are you sure you want to regenerate icons.json for this app? This operation may take a while.": "Jeni i sigurt që dëshironi të rigjeneroni icons.json për këtë aplikacion? Operacioni mund të zgjasë.",
+    "Are you sure you want to regenerate pois.geojson for this app? The job will be queued and may take a while.": "Jeni i sigurt që dëshironi të rigjeneroni pois.geojson për këtë aplikacion? Puna do të shtohet në radhë dhe mund të zgjasë.",
+    "Cancel": "Anulo",
+    "Command failed for app :name (ID: :id)": "Komanda dështoi për aplikacionin :name (ID: :id)",
+    "Errors": "Gabime",
+    "No app selected.": "Asnjë aplikacion i zgjedhur.",
+    "Regenerate icons.json": "Rigjenero icons.json",
+    "Regenerate pois.geojson": "Rigjenero pois.geojson",
+    "Yes, regenerate": "Po, rigjenero",
+    "icons.json generated successfully for :count app.": "icons.json u gjenerua me sukses për :count aplikacion.",
+    "pois.geojson generation job queued for :count app.": "Puna e gjenerimit të pois.geojson u shtua në radhë për :count aplikacion."
+}
