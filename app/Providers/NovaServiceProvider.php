@@ -9,8 +9,8 @@ use App\Nova\EcPoi;
 use App\Nova\EcTrack;
 use App\Nova\Layer;
 use App\Nova\Media as NovaMedia;
-use App\Nova\TaxonomyPoiType;
 use App\Nova\TaxonomyActivity;
+use App\Nova\TaxonomyPoiType;
 use App\Nova\TaxonomyWhere;
 use App\Nova\UgcPoi;
 use App\Nova\UgcTrack;
@@ -19,10 +19,12 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\Facades\Gate;
 use Laravel\Fortify\Features;
+use Laravel\Nova\Dashboard;
 use Laravel\Nova\Menu\MenuItem;
 use Laravel\Nova\Menu\MenuSection;
 use Laravel\Nova\Nova;
 use Laravel\Nova\NovaApplicationServiceProvider;
+use Laravel\Nova\Tool;
 
 class NovaServiceProvider extends NovaApplicationServiceProvider
 {
@@ -41,13 +43,13 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Admin'), [
                     MenuItem::resource(NovaApp::class)
-                        ->canSee(fn(Request $request) => $request->user()->hasRole('Administrator')),
+                        ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
                     MenuItem::resource(NovaUser::class)
-                        ->canSee(fn(Request $request) => $request->user()->hasRole('Administrator')),
+                        ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
                     MenuItem::resource(NovaMedia::class)
-                        ->canSee(fn(Request $request) => $request->user()->hasRole('Administrator')),
+                        ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
                 ])->icon('user')
-                    ->canSee(fn(Request $request) => $request->user()->hasRole('Administrator'))
+                    ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator'))
                     ->collapsable()
                     ->collapsedByDefault(),
 
@@ -71,7 +73,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make(__('Files'), [
                     MenuItem::externalLink(__('Icons'), route('icons.upload.show'))->openInNewTab(),
                 ])->icon('folder')
-                    ->canSee(fn(Request $request) => $request->user()->hasRole('Administrator'))
+                    ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator'))
                     ->collapsable()
                     ->collapsedByDefault(),
             ];
@@ -119,19 +121,19 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
     /**
      * Get the dashboards that should be listed in the Nova sidebar.
      *
-     * @return array<int, \Laravel\Nova\Dashboard>
+     * @return array<int, Dashboard>
      */
     protected function dashboards(): array
     {
         return [
-            new \App\Nova\Dashboards\Main,
+            new Main,
         ];
     }
 
     /**
      * Get the tools that should be listed in the Nova sidebar.
      *
-     * @return array<int, \Laravel\Nova\Tool>
+     * @return array<int, Tool>
      */
     public function tools(): array
     {
