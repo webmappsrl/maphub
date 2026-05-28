@@ -12,6 +12,7 @@ use App\Nova\Media as NovaMedia;
 use App\Nova\TaxonomyActivity;
 use App\Nova\TaxonomyPoiType;
 use App\Nova\TaxonomyWhere;
+use App\Nova\Tile;
 use App\Nova\UgcPoi;
 use App\Nova\UgcTrack;
 use App\Nova\User as NovaUser;
@@ -43,6 +44,8 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
 
                 MenuSection::make(__('Admin'), [
                     MenuItem::resource(NovaApp::class)
+                        ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
+                    MenuItem::resource(Tile::class)
                         ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
                     MenuItem::resource(NovaUser::class)
                         ->canSee(fn (Request $request) => $request->user()->hasRole('Administrator')),
