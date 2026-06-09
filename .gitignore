@@ -27,3 +27,4 @@ build/
 auth.json
 /storage/json/conf/
 /storage/json/pois/
+/storage/backups/
