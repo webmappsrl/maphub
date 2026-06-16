@@ -11,6 +11,7 @@ use App\Nova\Layer;
 use App\Nova\Media as NovaMedia;
 use App\Nova\TaxonomyActivity;
 use App\Nova\TaxonomyPoiType;
+use App\Nova\TaxonomyTheme;
 use App\Nova\TaxonomyWhere;
 use App\Nova\Tile;
 use App\Nova\UgcPoi;
@@ -70,6 +71,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('Taxonomies', [
                     MenuItem::resource(TaxonomyPoiType::class),
                     MenuItem::resource(TaxonomyActivity::class),
+                    MenuItem::resource(TaxonomyTheme::class),
                     MenuItem::resource(TaxonomyWhere::class),
                 ])->icon('document'),
 
