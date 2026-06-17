@@ -44,5 +44,6 @@
     "Summary": "Riepilogo",
     "This page expires after about :minutes minutes.": "Questa pagina scade dopo circa :minutes minuti.",
     "Updated": "Aggiornati",
-    ":count OSM IDs were skipped because they exceeded the per-run limit (OSM_IMPORT_MAX_IDS_PER_RUN). Import the remaining IDs in another run.": ":count OSMID non sono stati elaborati perché superano il limite per esecuzione (OSM_IMPORT_MAX_IDS_PER_RUN). Importa i rimanenti in un'altra esecuzione."
+    ":count OSM IDs were skipped because they exceeded the per-run limit (OSM_IMPORT_MAX_IDS_PER_RUN). Import the remaining IDs in another run.": ":count OSMID non sono stati elaborati perché superano il limite per esecuzione (OSM_IMPORT_MAX_IDS_PER_RUN). Importa i rimanenti in un'altra esecuzione.",
+    "Taxonomies": "Tassonomie"
 }
