@@ -17,16 +17,20 @@ Attualmente non è possibile modificare il ruolo di un utente tramite Nova — r
 - [x] Solo l'utente la cui email è in `WM_SUPER_ADMIN_EMAILS` può modificare i campi "Roles" e "Permissions"
 - [x] La logica di accesso usa `RolesAndPermissionsService::allowsUser()` — nessuna email hardcodata
 - [x] Protezione server-side: `fillUsing()` su `RoleBooleanGroup` e `PermissionBooleanGroup` ignora il payload se `allowsUser()` restituisce `false`
-- [x] Protezione anti-self-demotion: `fillUsing` impedisce di rimuovere il ruolo Administrator dall'utente corrente
+- [x] `fillUsing` esegue return early se il payload JSON è malformato (non azzera ruoli/permessi esistenti)
+- [x] Anti-self-demotion `RoleBooleanGroup`: impedisce di rimuovere il ruolo Administrator solo se l'utente lo aveva già nel DB
+- [x] Anti-self-demotion `PermissionBooleanGroup`: un super-admin che modifica se stesso non può rimuovere i propri permessi diretti esistenti
+- [x] Sorgente auth uniforme: `readonly()`, `fillUsing()` e `canSee()` usano tutti `$request->user()`
 - [x] I campi "Roles" e "Permissions" sono nascosti dall'index (solo detail/edit) tramite override in `app/Nova/User.php`
 - [x] `WM_SUPER_ADMIN_EMAILS` documentata in `.env-example`
-- [x] Test in maphub e wm-package verificano il comportamento readonly/editabile
+- [x] Test in maphub verificano la configurazione locale; test di logica guard in wm-package
 
 ## Rischi
 
 - **Regressione campi password**: rimuovendo il vecchio `fields()` da `User.php`, le regole password passano da `PasswordValidationRules` trait a `Rules\Password::defaults()`. **Mitigazione**: verificato che `AppServiceProvider` non sovrascriva `Password::defaults()`.
 - **Campi UGC HasMany**: `AbstractUserResource` include `HasMany` per `UgcPoi` e `UgcTrack`, visibili solo agli Administrator tramite `canSee`. Comportamento desiderabile.
 - **Guard solo visivo bypassabile via API**: mitigato dalla `fillUsing()` server-side che blocca la persistenza indipendentemente dal campo readonly.
+- **Anti-self-demotion permessi conservativa**: un super-admin non può rimuovere i propri permessi diretti via UI. Se serve una revoca esplicita, va fatta via CLI o tinker.
 
 ## Out of scope
 

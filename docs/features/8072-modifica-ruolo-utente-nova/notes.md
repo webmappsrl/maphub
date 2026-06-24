@@ -17,6 +17,14 @@
 - **`$editor` → `$nonSuperAdmin` nel test wm-package**: la variabile rappresentava un utente Administrator generico (non un Editor), il nome era fuorviante.
 - **`PermissionBooleanGroup` incluso nonostante il ticket parli solo di ruoli**: ruolo e permessi sono logicamente inseparabili in Spatie — modificare un ruolo senza poter gestire i permessi associati sarebbe un'esperienza incompleta. Decisione presa con il developer.
 
+## Bug trovati in code review (ciclo fix post-implementazione)
+
+Vedi `wm-package/docs/features/8072-modifica-ruolo-utente-nova/notes.md` per il dettaglio dei bug bloccanti trovati e risolti in wm-package.
+
+Specifico maphub:
+- **`WM_SUPER_ADMIN_EMAILS` assente da `.env-example`**: il task 4 era marcato ✅ ma la variabile non era stata aggiunta. Aggiunta nel ciclo di fix.
+- **2 test in maphub testavano logica wm-package**: `super-admin can change another users role` e `super-admin cannot remove their own Administrator role` sono stati rimossi da maphub e aggiunti in `AbstractUserResourceRoleGuardTest.php` del package.
+
 ## Follow-up
 
 - Audit log delle modifiche ai ruoli: non implementato in questo ciclo. Se necessario, aggiungere un observer su `model_has_roles` o usare il package `spatie/laravel-activitylog`.
