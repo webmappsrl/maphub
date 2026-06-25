@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Listeners\CheckCacheHealth;
+use App\Listeners\CheckDatabaseHealth;
+use Illuminate\Foundation\Events\DiagnosingHealth;
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\ServiceProvider;
 use Spatie\Permission\Models\Permission;
@@ -26,5 +30,8 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::policy(Role::class, RolePolicy::class);
         Gate::policy(Permission::class, PermissionPolicy::class);
+
+        Event::listen(DiagnosingHealth::class, CheckDatabaseHealth::class);
+        Event::listen(DiagnosingHealth::class, CheckCacheHealth::class);
     }
 }
