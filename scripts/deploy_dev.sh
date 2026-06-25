@@ -1,12 +1,18 @@
 #!/bin/bash
 set -e
 
+# Trust the repo and its submodule for all git calls in this process tree,
+# bypassing the container user/owner mismatch (dubious ownership check).
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=safe.directory
+export GIT_CONFIG_VALUE_0=/var/www/html/maphub
+export GIT_CONFIG_KEY_1=safe.directory
+export GIT_CONFIG_VALUE_1=/var/www/html/maphub/wm-package
+
 echo "Dev deployment started ..."
 
 # Enter maintenance mode or return true if already in maintenance mode
 (php artisan down) || true
-
-git submodule update --init --recursive
 
 composer install --no-interaction --prefer-dist --optimize-autoloader
 

@@ -37,7 +37,7 @@ jobs:
             COLOR="danger"
             TEXT="Deploy ${{ inputs.env_name }} fallito (tests=${{ inputs.tests_result }}, deploy=${{ inputs.deploy_result }}, smoke=${{ inputs.smoke_result }})"
           fi
-          curl -s -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
+          curl -v -X POST "${{ secrets.SLACK_WEBHOOK_URL }}" \
             -H "Content-Type: application/json" \
             -d "{
               \"text\": \"$EMOJI *Maphub ${{ inputs.env_name }}* — $TEXT\",
