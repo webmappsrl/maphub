@@ -1,24 +1,21 @@
 #!/bin/bash
 set -e
 
-echo "Deployment started ..."
+echo "Dev deployment started ..."
 
-# Enter maintenance mode or return true
-# if already is in maintenance mode
+# Enter maintenance mode or return true if already in maintenance mode
 (php artisan down) || true
 
 git submodule update --init --recursive
 
-# Install composer dependencies
-composer install  --no-interaction --prefer-dist --optimize-autoloader
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Run database migrations
-php artisan migrate
+php artisan optimize
 
-php artisan optimize:clear
-php artisan config:clear
+php artisan migrate --force
 
-# Exit maintenance mode
+source "$(dirname "$0")/horizon_terminate_wait.sh"
+
 php artisan up
 
-echo "Deployment finished!"
+echo "Dev deployment finished!"
