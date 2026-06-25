@@ -13,9 +13,8 @@ php artisan optimize
 
 php artisan migrate --force
 
-# gracefully terminate laravel horizon
-php artisan horizon:terminate
+source "$(dirname "$0")/horizon_terminate_wait.sh"
 
 php artisan up
 
-echo "Deployment finished!"
+echo "Prod deployment finished!"
