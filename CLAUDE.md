@@ -194,3 +194,18 @@ Il package fornisce:
 - Migrazioni (da pubblicare con `--tag=wm-package-migrations`)
 
 Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
+
+## Feature disponibili
+
+| Feature | Ticket | Moduli toccati | Note |
+|---|---|---|---|
+| CI/CD GitHub Actions con deploy automatico e smoke test | oc:8082 | `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `.github/workflows/notify-slack.yml`, `.github/workflows/run-tests.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `scripts/horizon_terminate_wait.sh`, `app/Listeners/CheckDatabaseHealth.php`, `app/Listeners/CheckCacheHealth.php`, `app/Providers/AppServiceProvider.php` | Pipeline CI/CD completa: tests → deploy SSH → smoke test (`/up` + `/login`) → notifica Slack `#zabbix-alerts`; listener `DiagnosingHealth` per check DB e cache su `/up` |
+
+## Decisioni architetturali
+
+### CI/CD GitHub Actions (oc:8082)
+- Container name hardcoded (`php-maphub`, `php-maphubdev`): pattern Webmapp confermato da camminiditalia — non usare `${APP_NAME}` che dipende dall'env del server
+- `horizon:terminate` usa Redis come canale di comunicazione, funziona correttamente tra container separati (`php-maphub` e `horizon-maphub`)
+- Smoke test aggiunge `sleep 15` prima dei curl per evitare falsi negativi da connection pool esaurito post-migrate
+- Loop attesa Horizon estratto in `scripts/horizon_terminate_wait.sh` e sourcato da entrambi i deploy script
+- Job Slack estratto in workflow riusabile `notify-slack.yml` per evitare duplicazione
