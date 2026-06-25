@@ -200,6 +200,7 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 | Feature | Ticket | Moduli toccati | Note |
 |---|---|---|---|
 | Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
+| CI/CD GitHub Actions con deploy automatico e smoke test | oc:8082 | `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `.github/workflows/notify-slack.yml`, `.github/workflows/run-tests.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `scripts/horizon_terminate_wait.sh`, `app/Listeners/CheckDatabaseHealth.php`, `app/Listeners/CheckCacheHealth.php`, `app/Providers/AppServiceProvider.php` | Pipeline CI/CD completa: tests → deploy SSH → smoke test (`/up` + `/login`) → notifica Slack `#zabbix-alerts`; listener `DiagnosingHealth` per check DB e cache su `/up` |
 
 ## Decisioni architetturali
 
@@ -208,3 +209,10 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 - Override `fields()` locale aggiunge `hideFromIndex()` su `RoleBooleanGroup` e `PermissionBooleanGroup` — il package resta agnostico sulla visibilità nell'index
 - `DatabaseTransactions` invece di `RefreshDatabase` nei test: `phpunit.xml` non configura un DB separato, `RefreshDatabase` svuoterebbe il DB di dev
 - Gli altri shard che aggiornano wm-package devono fare lo stesso override `hideFromIndex()` in `User.php`, altrimenti i campi ruolo/permessi appaiono come colonne nell'index
+
+### CI/CD GitHub Actions (oc:8082)
+- Container name hardcoded (`php-maphub`, `php-maphubdev`): pattern Webmapp confermato da camminiditalia — non usare `${APP_NAME}` che dipende dall'env del server
+- `horizon:terminate` usa Redis come canale di comunicazione, funziona correttamente tra container separati (`php-maphub` e `horizon-maphub`)
+- Smoke test aggiunge `sleep 15` prima dei curl per evitare falsi negativi da connection pool esaurito post-migrate
+- Loop attesa Horizon estratto in `scripts/horizon_terminate_wait.sh` e sourcato da entrambi i deploy script
+- Job Slack estratto in workflow riusabile `notify-slack.yml` per evitare duplicazione
