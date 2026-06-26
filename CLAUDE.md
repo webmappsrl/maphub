@@ -194,3 +194,17 @@ Il package fornisce:
 - Migrazioni (da pubblicare con `--tag=wm-package-migrations`)
 
 Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
+
+## Feature disponibili
+
+| Feature | Ticket | Moduli toccati | Note |
+|---|---|---|---|
+| Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
+
+## Decisioni architetturali
+
+### Modifica ruolo utente in Nova (oc:8072)
+- `app/Nova/User.php` estende `AbstractUserResource` (wm-package) — non ridefinisce i campi base, li eredita tutti
+- Override `fields()` locale aggiunge `hideFromIndex()` su `RoleBooleanGroup` e `PermissionBooleanGroup` — il package resta agnostico sulla visibilità nell'index
+- `DatabaseTransactions` invece di `RefreshDatabase` nei test: `phpunit.xml` non configura un DB separato, `RefreshDatabase` svuoterebbe il DB di dev
+- Gli altri shard che aggiornano wm-package devono fare lo stesso override `hideFromIndex()` in `User.php`, altrimenti i campi ruolo/permessi appaiono come colonne nell'index
