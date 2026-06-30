@@ -9,12 +9,17 @@ jobs:
       db:
         image: postgis/postgis:17-3.5-alpine
         env:
-          POSTGRES_PASSWORD: ${DB_PASSWORD}
-          POSTGRES_DB: ${DB_DATABASE}
-          POSTGRES_USER: ${DB_USERNAME}
+          POSTGRES_PASSWORD: laravel
+          POSTGRES_DB: laravel
+          POSTGRES_USER: laravel
         ports:
           - 5432:5432
         options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - uses: shivammathur/setup-php@v2
         with:

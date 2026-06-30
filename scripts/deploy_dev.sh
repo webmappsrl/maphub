@@ -1,24 +1,27 @@
 #!/bin/bash
 set -e
 
-echo "Deployment started ..."
+# Trust the repo and its submodule for all git calls in this process tree,
+# bypassing the container user/owner mismatch (dubious ownership check).
+export GIT_CONFIG_COUNT=2
+export GIT_CONFIG_KEY_0=safe.directory
+export GIT_CONFIG_VALUE_0=/var/www/html/maphub
+export GIT_CONFIG_KEY_1=safe.directory
+export GIT_CONFIG_VALUE_1=/var/www/html/maphub/wm-package
 
-# Enter maintenance mode or return true
-# if already is in maintenance mode
+echo "Dev deployment started ..."
+
+# Enter maintenance mode or return true if already in maintenance mode
 (php artisan down) || true
 
-git submodule update --init --recursive
+composer install --no-interaction --prefer-dist --optimize-autoloader
 
-# Install composer dependencies
-composer install  --no-interaction --prefer-dist --optimize-autoloader
+php artisan optimize
 
-# Run database migrations
-php artisan migrate
+php artisan migrate --force
 
-php artisan optimize:clear
-php artisan config:clear
+source "$(dirname "$0")/horizon_terminate_wait.sh"
 
-# Exit maintenance mode
 php artisan up
 
-echo "Deployment finished!"
+echo "Dev deployment finished!"

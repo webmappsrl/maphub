@@ -1,14 +1,14 @@
 # Secrets/variables richiesti (configurare su GitHub → Settings → Secrets and variables → Actions):
-#   Variables: HOSTPROD, USERNAMEPROD, PORTPROD, URLPROD (es. https://maphub.it)
-#   Secrets:   SSHKEYPROD, SLACK_WEBHOOK_URL
+#   Variables: HOSTDEV, USERNAMEDEV, PORTDEV, URLDEV (es. https://dev.maphub.it)
+#   Secrets:   SSHKEYDEV, SLACK_WEBHOOK_URL
 #   Secrets:   NOVA_USERNAME, NOVA_PASSWORD (ereditati da run-tests.yml)
 
-name: Laravel deploy PROD
+name: Laravel deploy DEV
 
 on:
   push:
     branches:
-      - main
+      - develop
 
 jobs:
   tests:
@@ -16,22 +16,23 @@ jobs:
     secrets: inherit
 
   deploy:
-    name: Deploy PROD
+    name: Deploy DEV
     needs: [tests]
     runs-on: ubuntu-latest
     steps:
-      - name: SSH connection and run scripts/deploy_prod.sh
+      - name: SSH connection and run scripts/deploy_dev.sh
         uses: appleboy/ssh-action@master
         with:
-          host: ${{ vars.HOSTPROD }}
-          username: ${{ vars.USERNAMEPROD }}
-          port: ${{ vars.PORTPROD }}
-          key: ${{ secrets.SSHKEYPROD }}
+          host: ${{ vars.HOSTDEV }}
+          username: ${{ vars.USERNAMEDEV }}
+          port: ${{ vars.PORTDEV }}
+          key: ${{ secrets.SSHKEYDEV }}
           script: >
             git config --global --add safe.directory /var/www/html/maphub &&
             git config --global --add safe.directory /var/www/html/maphub/wm-package &&
             cd /var/www/html/maphub &&
-            git pull &&
+            git fetch origin develop &&
+            git reset --hard origin/develop &&
             git submodule update --init --recursive &&
             printf '#!/bin/bash\nphp artisan horizon:terminate || true\n' > scripts/horizon_terminate_wait.sh &&
             docker exec -u root
@@ -40,10 +41,10 @@ jobs:
             -e GIT_CONFIG_VALUE_0=/var/www/html/maphub
             -e GIT_CONFIG_KEY_1=safe.directory
             -e GIT_CONFIG_VALUE_1=/var/www/html/maphub/wm-package
-            php-maphub bash scripts/deploy_prod.sh
+            php-maphubdev bash scripts/deploy_dev.sh
 
   smoke-test:
-    name: Smoke Test PROD
+    name: Smoke Test DEV
     needs: [deploy]
     runs-on: ubuntu-latest
     steps:
@@ -51,10 +52,10 @@ jobs:
         run: sleep 15
 
       - name: Health check /up
-        run: curl --fail --max-time 30 --retry 3 --retry-delay 5 ${{ vars.URLPROD }}/up
+        run: curl --fail --max-time 30 --retry 3 --retry-delay 5 ${{ vars.URLDEV }}/up
 
       - name: Check /login
-        run: curl --fail --max-time 30 --retry 3 --retry-delay 5 ${{ vars.URLPROD }}/login
+        run: curl --fail --max-time 30 --retry 3 --retry-delay 5 ${{ vars.URLDEV }}/login
 
   notify:
     name: Notify Slack
@@ -62,7 +63,7 @@ jobs:
     if: always() && vars.SLACK_NOTIFICATIONS_ENABLED != 'false'
     uses: ./.github/workflows/notify-slack.yml
     with:
-      env_name: PROD
+      env_name: DEV
       tests_result: ${{ needs.tests.result }}
       deploy_result: ${{ needs.deploy.result }}
       smoke_result: ${{ needs.smoke-test.result }}
