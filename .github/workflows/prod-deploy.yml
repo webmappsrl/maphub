@@ -59,7 +59,7 @@ jobs:
   notify:
     name: Notify Slack
     needs: [tests, deploy, smoke-test]
-    if: always()
+    if: always() && vars.SLACK_NOTIFICATIONS_ENABLED != 'false'
     uses: ./.github/workflows/notify-slack.yml
     with:
       env_name: PROD

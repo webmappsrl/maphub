@@ -31,7 +31,8 @@ jobs:
             git config --global --add safe.directory /var/www/html/maphub &&
             git config --global --add safe.directory /var/www/html/maphub/wm-package &&
             cd /var/www/html/maphub &&
-            git pull &&
+            git fetch origin develop &&
+            git reset --hard origin/develop &&
             git submodule update --init --recursive &&
             printf '#!/bin/bash\nphp artisan horizon:terminate || true\n' > scripts/horizon_terminate_wait.sh &&
             docker exec -u root
@@ -59,7 +60,7 @@ jobs:
   notify:
     name: Notify Slack
     needs: [tests, deploy, smoke-test]
-    if: always()
+    if: always() && vars.SLACK_NOTIFICATIONS_ENABLED != 'false'
     uses: ./.github/workflows/notify-slack.yml
     with:
       env_name: DEV
