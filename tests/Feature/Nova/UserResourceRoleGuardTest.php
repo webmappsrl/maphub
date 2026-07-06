@@ -25,6 +25,7 @@ it('Nova User resource extends AbstractUserResource', function () {
 
 it('Nova User resource fields include RoleBooleanGroup', function () {
     $user = User::factory()->create(['email' => 'superadmin@test.com']);
+    $user->assignRole('Administrator');
     Auth::login($user);
 
     $request = NovaRequest::create('/', 'GET');
