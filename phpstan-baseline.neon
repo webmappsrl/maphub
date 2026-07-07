@@ -1,19 +1,187 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Undefined variable\: \$this$#'
-			identifier: variable.undefined
+			message: '#^Parameter \$related_url of method Wm\\WmPackage\\Dto\\EcPoiPropertiesData\:\:__construct\(\) expects array\<int, string\>\|null, array\<string, string\>\|null given\.$#'
+			identifier: argument.type
 			count: 1
-			path: routes/console.php
+			path: app/Dto/OsmEcPoiPropertiesData.php
 
 		-
-			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:get\(\)\.$#'
+			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
+			identifier: property.notFound
+			count: 1
+			path: app/Nova/Actions/ImportEcPoiFromOsm.php
+
+		-
+			message: '#^Method App\\Nova\\Actions\\ImportEcPoiFromOsm\:\:resolveApp\(\) should return Wm\\WmPackage\\Models\\App\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
+			identifier: return.type
+			count: 2
+			path: app/Nova/Actions/ImportEcPoiFromOsm.php
+
+		-
+			message: '#^Trait App\\Nova\\Traits\\FiltersUsersByRoleTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: app/Nova/Traits/FiltersUsersByRoleTrait.php
+
+		-
+			message: '#^Trait App\\Nova\\Traits\\HidesAppFromIndexTrait is used zero times and is not analysed\.$#'
+			identifier: trait.unused
+			count: 1
+			path: app/Nova/Traits/HidesAppFromIndexTrait.php
+
+		-
+			message: '#^Call to an undefined method Illuminate\\Database\\Schema\\IndexDefinition\:\:comment\(\)\.$#'
 			identifier: method.notFound
 			count: 1
-			path: tests/Feature/ExampleTest.php
+			path: database/migrations/2026_04_17_081128_create_ec_tracks_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081151_z_add_foreign_keys_to_app_layer_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/migrations/2026_04_17_081153_z_add_foreign_keys_to_ec_poi_ec_track_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/migrations/2026_04_17_081156_z_add_foreign_keys_to_media_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081157_z_add_foreign_keys_to_model_has_permissions_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081158_z_add_foreign_keys_to_model_has_roles_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/migrations/2026_04_17_081159_z_add_foreign_keys_to_role_has_permissions_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/migrations/2026_04_17_081204_z_add_foreign_keys_to_ugc_pois_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''CASCADE'' given\.$#'
+			identifier: argument.type
+			count: 2
+			path: database/migrations/2026_04_17_081205_z_add_foreign_keys_to_ugc_tracks_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''SET NULL'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081207_z_add_user_foreign_key_to_ec_pois_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''SET NULL'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081208_z_add_user_foreign_key_to_ec_tracks_table.php
+
+		-
+			message: '#^Parameter \#1 \$action of method Illuminate\\Database\\Schema\\ForeignKeyDefinition\:\:onDelete\(\) expects ''cascade''\|''no action''\|''restrict''\|''set null'', ''SET NULL'' given\.$#'
+			identifier: argument.type
+			count: 1
+			path: database/migrations/2026_04_17_081209_z_add_user_foreign_key_to_layers_table.php
+
+		-
+			message: '#^Method Illuminate\\Database\\Schema\\Blueprint\:\:float\(\) invoked with 3 parameters, 1\-2 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: database/migrations/2026_07_07_124546_create_users_table.php
+
+		-
+			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:actingAs\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/Feature/OsmImportReportRouteTest.php
+
+		-
+			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:post\(\)\.$#'
+			identifier: method.notFound
+			count: 6
+			path: tests/Feature/WebAccessBlockedForGuestTest.php
+
+		-
+			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:postJson\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Feature/WebAccessBlockedForGuestTest.php
+
+		-
+			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:withHeaders\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Feature/WebAccessBlockedForGuestTest.php
+
+		-
+			message: '#^Result of method Illuminate\\Contracts\\Auth\\StatefulGuard\:\:login\(\) \(void\) is used\.$#'
+			identifier: method.void
+			count: 1
+			path: tests/Feature/WebAccessBlockedForGuestTest.php
 
 		-
 			message: '#^Undefined variable\: \$this$#'
 			identifier: variable.undefined
 			count: 1
 			path: tests/Pest.php
+
+		-
+			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:andThrow\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:never\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:once\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Parameter \#1 \$osmClient of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:162 constructor expects Wm\\WmPackage\\Http\\Clients\\OsmClient, Mockery\\MockInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Parameter \#1 \$osmClient of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:188 constructor expects Wm\\WmPackage\\Http\\Clients\\OsmClient, Mockery\\MockInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Parameter \#2 \$taxonomyResolver of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:162 constructor expects App\\Services\\Osm\\OsmTaxonomyPoiTypeResolver, Mockery\\MockInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
+
+		-
+			message: '#^Parameter \#2 \$taxonomyResolver of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:188 constructor expects App\\Services\\Osm\\OsmTaxonomyPoiTypeResolver, Mockery\\MockInterface given\.$#'
+			identifier: argument.type
+			count: 1
+			path: tests/Unit/OsmPoiImportTest.php
