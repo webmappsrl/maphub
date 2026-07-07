@@ -12,12 +12,19 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         with:
           ref: ${{ github.head_ref }}
+          fetch-depth: 0
+
+      - name: Fetch base branch for Pint diff
+        run: git fetch --no-tags origin ${{ github.base_ref }}:${{ github.base_ref }}
 
       - name: Fix PHP code style issues
-        uses: aglipanci/laravel-pint-action@2.4
+        uses: aglipanci/laravel-pint-action@2.6
+        with:
+          useComposer: true
+          onlyDiff: ${{ github.base_ref }}
 
       - name: Commit changes
         uses: stefanzweifel/git-auto-commit-action@v4

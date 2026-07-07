@@ -18,7 +18,12 @@ composer install --no-interaction --prefer-dist --optimize-autoloader
 
 php artisan optimize
 
+# Le migration wm-package arrivano gia' committate via git.
+# Gate CI: publish-missing-migrations --dry-run nel job tests (run-tests.yml).
+# Questo script non genera mai file.
 php artisan migrate --force
+
+php artisan permission:cache-reset
 
 source "$(dirname "$0")/horizon_terminate_wait.sh"
 

@@ -26,8 +26,11 @@ vendor/bin/pest --filter=<nome-test>
 # PHPStan
 vendor/bin/phpstan analyse
 
-# Pubblicare migrazioni dal wm-package
-php artisan vendor:publish --tag=wm-package-migrations
+# Migration wm-package (dopo aggiornamento submodule)
+php artisan wm-package:publish-missing-migrations --dry-run
+php artisan wm-package:publish-missing-migrations
+php artisan migrate
+# Poi committare i file in database/migrations/
 ```
 
 ## Setup progetto
@@ -46,6 +49,7 @@ bash docker/init-docker.sh
 docker exec -it php-${APP_NAME} composer install
 docker exec -it php-${APP_NAME} php artisan key:generate
 docker exec -it php-${APP_NAME} php artisan optimize
+# Bootstrap iniziale migration wm-package (solo prima installazione; vedi install.sh)
 docker exec -it php-${APP_NAME} php artisan vendor:publish --tag=wm-package-migrations
 docker exec -it php-${APP_NAME} php artisan migrate
 
@@ -191,7 +195,7 @@ Il package fornisce:
 - Risorse Nova base
 - Policy Role/Permission
 - Comandi artisan personalizzati
-- Migrazioni (da pubblicare con `--tag=wm-package-migrations`)
+- Migrazioni stub obbligatori — workflow: `wm-package:publish-missing-migrations` (vedi sezione oc:8218). `vendor:publish --tag=wm-package-migrations` solo bootstrap iniziale (`install.sh`), mai in deploy
 
 Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 
@@ -203,8 +207,49 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 | Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
 | Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
 | CI/CD GitHub Actions con deploy automatico e smoke test | oc:8082 | `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `.github/workflows/notify-slack.yml`, `.github/workflows/run-tests.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `scripts/horizon_terminate_wait.sh`, `app/Listeners/CheckDatabaseHealth.php`, `app/Listeners/CheckCacheHealth.php`, `app/Providers/AppServiceProvider.php` | Pipeline CI/CD completa: tests → deploy SSH → smoke test (`/up` + `/login`) → notifica Slack `#zabbix-alerts`; listener `DiagnosingHealth` per check DB e cache su `/up` |
+| CI/CD: gate migration wm-package + invalidazione cache permessi | oc:8218 | `.github/workflows/run-tests.yml`, `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `wm-package/src/Commands/WmPackage{PublishMigration,PublishMissingMigrations}Command.php` | Gate CI: `publish-missing-migrations --dry-run` dopo migrate (stesso DB dei test). Deploy: `migrate` + `permission:cache-reset`, mai `vendor:publish` |
 
 ## Decisioni architetturali
+
+### CI/CD: gate migration wm-package + invalidazione cache permessi (oc:8218)
+
+**Fonte di verità:** `docs/features/8218-cicd-migration-wm-package-permission-cache/overview.md` (diagrammi mermaid + casi d'uso A–H).
+
+**Principi:**
+- Stub wm-package **obbligatori** — il gate verifica lo **schema DB reale**, non suffissi file né mappature manuali
+- Migration solo via **git** — mai `vendor:publish` in deploy; mai `vendor:publish --force` in locale
+- Risoluzione sempre **locale → commit → push** — gli script deploy non generano file
+
+**Pipeline CI** (job `tests` in `run-tests.yml`, stesso DB PostGIS dei test):
+```
+migrate → publish-missing-migrations --dry-run → php artisan test → deploy (se passa)
+```
+`deploy` dipende solo da `tests`. Deploy: `migrate --force` → `permission:cache-reset` (sempre, incondizionato).
+
+**Comandi attivi (solo 2):**
+| Comando | Ruolo |
+|---------|--------|
+| `wm-package:publish-missing-migrations --dry-run` | Gate CI e verifica locale; **exit 1** se stub non allineati |
+| `wm-package:publish-missing-migrations` | Pubblica file mancanti in `database/migrations/` |
+| `wm-package:publish-migration <stub>` | Publish singolo stub; ignora falsi positivi da suffisso |
+
+**Logica gate per stub** (dopo `migrate`):
+1. Schema DB completo rispetto allo stub → allineato (anche senza file wm-package, se un'altra migration ha lo stesso effetto)
+2. File committato **identico** allo stub ma non in tabella `migrations` → exit 1, esegui `migrate`
+3. Gap schema e nessun file identico → exit 1, pubblica migration wm-package
+
+**Caso noto maphub:** `create_users_table` — `0001_..._create_users_table.php` è Laravel (`Schema::create`); stub wm-package aggiunge `balance`/`fiscal_code`/`app_id` via `Schema::table`. Suffisso uguale ≠ schema allineato.
+
+**Casi d'uso rapidi per agenti:**
+| Scenario | Azione |
+|----------|--------|
+| Push normale, tutto allineato | `--dry-run` exit 0 → CI passa |
+| Nuovo stub dopo update wm-package | `publish-missing-migrations` → `migrate` → commit |
+| `--dry-run` segnala stub + gap colonne | Pubblica migration wm-package, non basta il file Laravel omonimo |
+| File identico in git, non migrato | Solo `php artisan migrate` |
+| Schema già ok via migration custom (nome diverso) | Nessuna azione |
+| CI fallisce | Fix in locale, mai publish sul server |
+
 
 ### Import Layer: associazione EcPoi via taxonomy (oc:8043)
 - `associateLayersWithEcPoi()` controlla in sequenza `taxonomy_themeables`, `taxonomy_whereables` e `taxonomy_poi_typeables` — **taxonomy_theme è il meccanismo primario** per app 63 e app 44 (poi per layer: 4–48 su 63, 101–109 su 44)
@@ -229,3 +274,27 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 - Smoke test aggiunge `sleep 15` prima dei curl per evitare falsi negativi da connection pool esaurito post-migrate
 - Loop attesa Horizon estratto in `scripts/horizon_terminate_wait.sh` e sourcato da entrambi i deploy script
 - Job Slack estratto in workflow riusabile `notify-slack.yml` per evitare duplicazione
+
+## Migration wm-package (stub obbligatori)
+
+Gli stub in `wm-package/database/migrations/*.stub` **non sono opzionali**. Dettaglio completo: `docs/features/8218-cicd-migration-wm-package-permission-cache/overview.md`.
+
+### Workflow (dopo aggiornamento wm-package)
+
+```bash
+php artisan wm-package:publish-missing-migrations --dry-run   # = gate CI
+php artisan wm-package:publish-missing-migrations             # se exit 1
+php artisan migrate
+git add database/migrations/ && git commit
+php artisan wm-package:publish-missing-migrations --dry-run   # verifica
+```
+
+### Se `--dry-run` fallisce (exit 1)
+
+Risoluzione **sempre in locale → git**, mai sul server:
+
+1. Leggi `wm-package/database/migrations/<nome>.php.stub`
+2. Cerca migration equivalente in `database/migrations/` (per **contenuto/schema**, non solo nome)
+3. **Schema già allineato sul DB** → nessuna azione (se fallisce comunque, verifica `migrate`)
+4. **Gap sul DB** → `publish-migration <stub>` o `publish-missing-migrations` + `migrate` + commit
+5. **File identico committato ma non migrato** → `php artisan migrate`
