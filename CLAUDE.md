@@ -143,7 +143,7 @@ Questo permette di personalizzare label, campi, o aggiungere funzionalità mante
 
 ### Impersonate (oc:8231)
 
-Il trait nativo `Laravel\Nova\Auth\Impersonatable` è abilitato su `Wm\WmPackage\Models\User` (non su `app/Models/User.php`, che eredita tutto). Solo gli Administrator possono impersonare (`config('wm-package.impersonation.allowed_roles')`, default `['Administrator']`), e nessun Administrator può essere impersonato (nemmeno da un altro Administrator). Dettagli completi in `wm-package/docs/features/8231-aggiungere-impersonate/`.
+Il trait nativo `Laravel\Nova\Auth\Impersonatable` è abilitato su `Wm\WmPackage\Models\User` (non su `app/Models/User.php`, che eredita tutto). Solo gli Administrator possono impersonare (ruolo hardcoded, nessuna config per consumer). Un Administrator **può** impersonare un altro Administrator; l'unico requisito per essere impersonabili è avere il permesso `access-nova` (esclude Guest, che altrimenti lascerebbe l'admin bloccato senza poter fare "Stop impersonating"). Nessun log/audit trail per start/stop — rifiutato esplicitamente in review dal CTO (se servirà, va introdotto trasversalmente nel package, non ad hoc per questa feature). Dettagli completi in `wm-package/docs/features/8231-aggiungere-impersonate/`.
 
 **Gotcha nota — falso "redirect al login" cliccando Impersonate dalla pagina Detail (non dall'Index): è un bug di Laravel Nova, non del codice di questo progetto.**
 
@@ -220,7 +220,7 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 
 | Feature | Ticket | Moduli toccati | Note |
 |---|---|---|---|
-| Aggiungere impersonate su Nova | oc:8231 | `wm-package/src/Models/User.php`, `wm-package/config/wm-package.php`, `wm-package/src/Listeners/{LogImpersonationStarted,LogImpersonationStopped}.php`, `wm-package/src/Providers/EventServiceProvider.php` | Trait nativo Nova `Impersonatable`; solo Administrator possono impersonare, nessun Administrator è impersonabile. Vedi sezione `## Nova → Impersonate` per dettagli e gotcha CSRF Detail-page |
+| Aggiungere impersonate su Nova | oc:8231 | `wm-package/src/Models/User.php`, `wm-package/src/Nova/AbstractUserResource.php` | Trait nativo Nova `Impersonatable`; solo Administrator possono impersonare (hardcoded), admin-su-admin ammesso, target richiede `access-nova`. Nessun log/audit trail (rifiutato dal CTO in review). Vedi sezione `## Nova → Impersonate` per dettagli e gotcha CSRF Detail-page |
 | Import Layer: associazione EcPoi via taxonomy (theme/where/poi_type) | oc:8043 | `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Jobs/Import/ImportLayerJob.php`, `wm-package/config/wm-geohub-import.php`, `wm-package/tests/Feature/GeohubImportServiceAssociateLayerPoiTest.php` | `associateLayersWithEcPoi()` traversa tutti e tre i meccanismi taxonomy; taxonomy_theme è il primario per app 63 e app 44 |
 | Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
 | Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
