@@ -1,5 +1,64 @@
 # Changelog
 
+## [1.4.0](https://github.com/webmappsrl/maphub/compare/v1.3.0...v1.4.0) (2026-07-24)
+
+
+### Features
+
+* add improved POI import and reporting features OC: 7815 ([8da03b5](https://github.com/webmappsrl/maphub/commit/8da03b56350aada300ba14d8907653c163ed2e20))
+* add Tile class and related migrations OC:7969 ([cd4e7c1](https://github.com/webmappsrl/maphub/commit/cd4e7c1900cbfea7a41fccb00d5338b1a6975b28))
+* add unit tests for OSM POI importer OC:7815 ([64fcc9d](https://github.com/webmappsrl/maphub/commit/64fcc9dcf396ca1ab95f29bea023300a98474028))
+* enhance Import Layer with EcPoi taxonomy OC:8043 ([#10](https://github.com/webmappsrl/maphub/issues/10)) ([33575af](https://github.com/webmappsrl/maphub/commit/33575af958b2f7f4a56d73d5767945c161859187))
+* enhance POI import with global flag option OC:7815 ([1e3af04](https://github.com/webmappsrl/maphub/commit/1e3af04be0fe5030110a6aa1bad339ad03cb2db8))
+* enhance role assignment process ([e41d451](https://github.com/webmappsrl/maphub/commit/e41d451cdf11c7a608799f18ccef2da1e6b26931))
+* **migrations:** ✨ add initial database schema for applications and related entities ([d65bed1](https://github.com/webmappsrl/maphub/commit/d65bed1ee91282773edbe76de2a3a32615320ecd))
+* **migrations:** ✨ add new taxonomy and feature collection related tables ([7333c3b](https://github.com/webmappsrl/maphub/commit/7333c3bd146df75e41fe3b2ed25958726ecc1975))
+* **models:** ✨ add EcTrack model extending WmEcTrack ([8eea5e5](https://github.com/webmappsrl/maphub/commit/8eea5e58681625dd82337387a44e0d205449c9a6))
+* **nova:** ✨ add TaxonomyActivity resource to Nova ([ff98e0e](https://github.com/webmappsrl/maphub/commit/ff98e0e2461bf629de23ee52fc2c518efec1a048))
+* **nova:** ✨ add TaxonomyTheme resource to Nova OC:8014 ([#3](https://github.com/webmappsrl/maphub/issues/3)) ([b69e761](https://github.com/webmappsrl/maphub/commit/b69e761ebbc70635e102f461590290292e14e771))
+* **nova:** ✨ add TaxonomyWhere resource to Nova ([d0663c7](https://github.com/webmappsrl/maphub/commit/d0663c707f54a0c2c3409423d160d5cb23c2149f))
+* **nova:** ✨ extend AbstractUserResource in User resource OC:8072 ([#4](https://github.com/webmappsrl/maphub/issues/4)) ([a0a87f2](https://github.com/webmappsrl/maphub/commit/a0a87f2c72ef3dfef4abce8f31c6980c6a60d5ba))
+* **oc:8082:** CI/CD GitHub Actions — deploy, smoke test, Slack notify ([#9](https://github.com/webmappsrl/maphub/issues/9)) ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** restore Slack notifications and remove temp feature branch trigger ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8161:** require access-nova permission for Nova web access ([b5dc85f](https://github.com/webmappsrl/maphub/commit/b5dc85fcc9b5cda1db4c6badec1aeaa03be01fdf))
+* **oc:8161:** require access-nova permission for Nova web access ([f787960](https://github.com/webmappsrl/maphub/commit/f787960b3933d84379151f0d4cbebc5ca25a41ac))
+* **oc:8161:** require access-nova permission for Nova web access ([ca9e865](https://github.com/webmappsrl/maphub/commit/ca9e8652c923cf1426bed3dbb1c95e8e0a78806e))
+* **oc:8218:** gate migration wm-package in CI e permission:cache-reset in deploy ([f35ac02](https://github.com/webmappsrl/maphub/commit/f35ac0266db10fb9b3ffc2e9d044d4bc2f4e80a8))
+* **oc:8218:** gate migration wm-package in CI e permission:cache-reset in deploy ([f35ac02](https://github.com/webmappsrl/maphub/commit/f35ac0266db10fb9b3ffc2e9d044d4bc2f4e80a8))
+* **oc:8218:** gate migration wm-package in CI e permission:cache-reset in deploy ([5389524](https://github.com/webmappsrl/maphub/commit/5389524c2fd00a38bcc2ec78b63dfa1a8e5abd87))
+* **osm:** add ability to import POIs from OSM OC:7815 ([2b0cda0](https://github.com/webmappsrl/maphub/commit/2b0cda03de9022516c60de2d6e7c997770e23256))
+* **taxonomy:** ✨ add TaxonomyTheme and TaxonomyThemeable migrations, update Nova menu oc:8081 ([1f8f62e](https://github.com/webmappsrl/maphub/commit/1f8f62ec25a485a58f7a1668c125a02f82327847))
+
+
+### Bug Fixes
+
+* aggiorna baseline PHPStan dopo rimozione ExampleTest.php ([629256c](https://github.com/webmappsrl/maphub/commit/629256cf678dc1b2eee7a77d5efaa5aa919d86a6))
+* aggiorna baseline PHPStan dopo rimozione ExampleTest.php ([fc63663](https://github.com/webmappsrl/maphub/commit/fc63663722e92a42c90e56dfb2a6fe0927746296))
+* **oc:8082:** add safe.directory config before git pull to fix dubious ownership error ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** add safe.directory inside Docker container to fix dubious ownership on submodule update ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** broaden horizon:status grep to match Horizon v5 output format ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** chown .git/modules to www-data after SSH-level submodule update ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** inject safe.directory via GIT_CONFIG env vars instead of git config --global ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** pass GIT_CONFIG env vars via docker exec -e to fix dubious ownership ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** remove boilerplate ExampleTest that asserted 200 on redirect route ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** remove Feature testsuite from phpunit.xml — directory no longer exists ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** remove git submodule update from deploy scripts ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** remove horizon wait loop — supervisor auto-restarts Horizon ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** run docker exec as root to bypass file ownership mismatches ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+* **oc:8082:** use explicit paths for safe.directory instead of wildcard ([a0d18e8](https://github.com/webmappsrl/maphub/commit/a0d18e8991bffa4efec52f0a240d37ba891d005a))
+
+
+### Miscellaneous Chores
+
+* update .gitignore for new storage paths OC:7911 ([a81c52d](https://github.com/webmappsrl/maphub/commit/a81c52d93e84272f92bae734ae6d65b0acb44e44))
+* update .gitignore for storage dirs OC:8007 ([13e99a1](https://github.com/webmappsrl/maphub/commit/13e99a1ba8eb92b2390533cfb142755abac2f84e))
+* update .gitignore for storage path ([691fbe5](https://github.com/webmappsrl/maphub/commit/691fbe55a1199bf8a15bb03f47aab7b334c00336))
+* update composer.lock to support Laravel 13 and adjust package versions ([e245172](https://github.com/webmappsrl/maphub/commit/e245172866339404a2eb901e0705bd26c7b955de))
+* update plugin-api-version in composer.lock to 2.9.0 ([caecb75](https://github.com/webmappsrl/maphub/commit/caecb75990ff5235517a92cd26347df8f9ac24d4))
+* update submodule wm-package ([70753ae](https://github.com/webmappsrl/maphub/commit/70753aebd65f0b066b2122d69ea94c5d111f8c2c))
+* update submodule wm-package OC: 8298 ([3c05181](https://github.com/webmappsrl/maphub/commit/3c05181b79dce5c0fdfbb5a30a830927910a1e54))
+* update wm-package version and plugin-api OC: 8298 ([5a2e2d7](https://github.com/webmappsrl/maphub/commit/5a2e2d7f19b71a326e5156a219afaa5c39652512))
+
 ## [1.3.0](https://github.com/webmappsrl/laravel-postgis-boilerplate/compare/v1.2.1...v1.3.0) (2026-03-17)
 
 
