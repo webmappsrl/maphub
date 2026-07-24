@@ -141,6 +141,23 @@ class App extends WmNovaApp {}
 
 Questo permette di personalizzare label, campi, o aggiungere funzionalità mantenendo la logica base nel package.
 
+### Impersonate (oc:8231)
+
+Il trait nativo `Laravel\Nova\Auth\Impersonatable` è abilitato su `Wm\WmPackage\Models\User` (non su `app/Models/User.php`, che eredita tutto). Solo gli Administrator possono impersonare (ruolo hardcoded, nessuna config per consumer). Un Administrator **può** impersonare un altro Administrator; l'unico requisito per essere impersonabili è avere il permesso `access-nova` (esclude Guest, che altrimenti lascerebbe l'admin bloccato senza poter fare "Stop impersonating"). Nessun log/audit trail per start/stop — rifiutato esplicitamente in review dal CTO (se servirà, va introdotto trasversalmente nel package, non ad hoc per questa feature). Dettagli completi in `wm-package/docs/features/8231-aggiungere-impersonate/`.
+
+**Gotcha nota — falso "redirect al login" cliccando Impersonate dalla pagina Detail (non dall'Index): è un bug di Laravel Nova, non del codice di questo progetto.**
+
+Doppia esclusione del codice applicativo:
+1. Riprodotto via HTTP reale (login → detail page → impersonate → redirect) sia da Index sia da Detail: il backend risponde sempre 200 e la sessione passa correttamente all'utente impersonato in entrambi i casi — non è un problema di autorizzazione o sessione lato applicazione.
+2. La causa vive interamente dentro `vendor/laravel/nova` (pacchetto di terze parti, non modificato in questo progetto): `resources/views/layout.blade.php` stampa il tag `<meta name="csrf-token">` una volta al caricamento pagina, e `resources/js/bootstrap/axios.js` lo legge **una sola volta** all'avvio della SPA senza mai rinfrescarlo durante la navigazione client-side. Se il token in memoria è stantio, la prima chiamata AJAX che riceve 401 attiva il redirect automatico al login di Nova.
+
+Confermato come comportamento noto e **mai risolto upstream** — segnalazioni identiche sul bug tracker ufficiale `laravel/nova-issues` sono state chiuse dal team Laravel/Nova come "not planned"/stale:
+- [laravel/nova-issues#5773 — "Users can't be impersonated more than once per session/back-to-back"](https://github.com/laravel/nova-issues/issues/5773)
+- [laravel/nova-issues#6082 — "Invalid sessions when impersonate a user for the second time..."](https://github.com/laravel/nova-issues/issues/6082)
+- [Spiegazione tecnica del pattern "meta tag CSRF stantio dopo un cambio di sessione SPA" (dev.to)](https://dev.to/vsimke/why-your-laravel-inertiajs-fetch-requests-fail-with-419-after-save-3lg4)
+
+**Risolto** evitando di esporre il punto d'ingresso che lo attiva (non il bug in sé, impossibile da correggere senza patchare Nova): `Wm\WmPackage\Nova\AbstractUserResource::authorizedToImpersonate()` restituisce `false` quando `$request->isResourceDetailRequest()`, nascondendo il bottone "Impersonate" dalla pagina Detail. Dall'Index resta disponibile — è l'unico contesto in cui il bug non si presenta. Verificato via HTTP reale e con test dedicato (`wm-package/tests/Feature/Nova/AbstractUserResourceImpersonateTest.php`). Il reload completo della pagina resta un fallback valido per qualunque altra azione Nova che cambi sessione/utente al di fuori di questo meccanismo, ma non è più necessario per impersonate nell'uso normale.
+
 ## Ruoli e Permessi
 
 Il sistema usa spatie/laravel-permission tramite wm-package. Ruoli predefiniti:
@@ -203,6 +220,7 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 
 | Feature | Ticket | Moduli toccati | Note |
 |---|---|---|---|
+| Aggiungere impersonate su Nova | oc:8231 | `wm-package/src/Models/User.php`, `wm-package/src/Nova/AbstractUserResource.php` | Trait nativo Nova `Impersonatable`; solo Administrator possono impersonare (hardcoded), admin-su-admin ammesso, target richiede `access-nova`. Nessun log/audit trail (rifiutato dal CTO in review). Vedi sezione `## Nova → Impersonate` per dettagli e gotcha CSRF Detail-page |
 | Import Layer: associazione EcPoi via taxonomy (theme/where/poi_type) | oc:8043 | `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Jobs/Import/ImportLayerJob.php`, `wm-package/config/wm-geohub-import.php`, `wm-package/tests/Feature/GeohubImportServiceAssociateLayerPoiTest.php` | `associateLayersWithEcPoi()` traversa tutti e tre i meccanismi taxonomy; taxonomy_theme è il primario per app 63 e app 44 |
 | Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
 | Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
