@@ -11541,7 +11541,7 @@
         },
         {
             "name": "wm/wm-package",
-            "version": "dev-oc_7546",
+            "version": "dev-main",
             "dist": {
                 "type": "path",
                 "url": "./wm-package",
@@ -15526,5 +15526,5 @@
         "php": "^8.2"
     },
     "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "plugin-api-version": "2.9.0"
 }
