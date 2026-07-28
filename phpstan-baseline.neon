@@ -1,24 +1,6 @@
 parameters:
 	ignoreErrors:
 		-
-			message: '#^Parameter \$related_url of method Wm\\WmPackage\\Dto\\EcPoiPropertiesData\:\:__construct\(\) expects array\<int, string\>\|null, array\<string, string\>\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Dto/OsmEcPoiPropertiesData.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Nova/Actions/ImportEcPoiFromOsm.php
-
-		-
-			message: '#^Method App\\Nova\\Actions\\ImportEcPoiFromOsm\:\:resolveApp\(\) should return Wm\\WmPackage\\Models\\App\|null but returns Illuminate\\Database\\Eloquent\\Model\|null\.$#'
-			identifier: return.type
-			count: 2
-			path: app/Nova/Actions/ImportEcPoiFromOsm.php
-
-		-
 			message: '#^Trait App\\Nova\\Traits\\FiltersUsersByRoleTrait is used zero times and is not analysed\.$#'
 			identifier: trait.unused
 			count: 1
@@ -109,12 +91,6 @@ parameters:
 			path: database/migrations/2026_07_07_124546_create_users_table.php
 
 		-
-			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:actingAs\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: tests/Feature/OsmImportReportRouteTest.php
-
-		-
 			message: '#^Call to an undefined method PHPUnit\\Framework\\TestCase\:\:post\(\)\.$#'
 			identifier: method.notFound
 			count: 6
@@ -144,44 +120,3 @@ parameters:
 			count: 1
 			path: tests/Pest.php
 
-		-
-			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:andThrow\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:never\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Call to an undefined method Mockery\\ExpectationInterface\|Mockery\\HigherOrderMessage\:\:once\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Parameter \#1 \$osmClient of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:162 constructor expects Wm\\WmPackage\\Http\\Clients\\OsmClient, Mockery\\MockInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Parameter \#1 \$osmClient of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:188 constructor expects Wm\\WmPackage\\Http\\Clients\\OsmClient, Mockery\\MockInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomyResolver of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:162 constructor expects App\\Services\\Osm\\OsmTaxonomyPoiTypeResolver, Mockery\\MockInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php
-
-		-
-			message: '#^Parameter \#2 \$taxonomyResolver of class App\\Services\\Osm\\OsmPoiImporter@anonymous/tests/Unit/OsmPoiImportTest\.php\:188 constructor expects App\\Services\\Osm\\OsmTaxonomyPoiTypeResolver, Mockery\\MockInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: tests/Unit/OsmPoiImportTest.php

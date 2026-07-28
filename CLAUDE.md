@@ -203,6 +203,7 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 
 | Feature | Ticket | Moduli toccati | Note |
 |---|---|---|---|
+| Import EcPoi da OSM spostato in wm-package | oc:8239 | `app/Nova/EcPoi.php` (semplificato a stub), `wm-package/src/Nova/Actions/ImportEcPoiFromOsm.php` | Logica business rimossa da Maphub; l'azione arriva di default da `Wm\WmPackage\Nova\EcPoi::actions()`. Vedi `wm-package/CLAUDE.md` per i dettagli architetturali |
 | Import Layer: associazione EcPoi via taxonomy (theme/where/poi_type) | oc:8043 | `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Jobs/Import/ImportLayerJob.php`, `wm-package/config/wm-geohub-import.php`, `wm-package/tests/Feature/GeohubImportServiceAssociateLayerPoiTest.php` | `associateLayersWithEcPoi()` traversa tutti e tre i meccanismi taxonomy; taxonomy_theme è il primario per app 63 e app 44 |
 | Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
 | Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
@@ -210,6 +211,13 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 | CI/CD: gate migration wm-package + invalidazione cache permessi | oc:8218 | `.github/workflows/run-tests.yml`, `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `wm-package/src/Commands/WmPackage{PublishMigration,PublishMissingMigrations}Command.php` | Gate CI: `publish-missing-migrations --dry-run` dopo migrate (stesso DB dei test). Deploy: `migrate` + `permission:cache-reset`, mai `vendor:publish` |
 
 ## Decisioni architetturali
+
+### Import EcPoi da OSM spostato in wm-package (oc:8239)
+- Tutta la logica (Nova Action, servizi, DTO, comando CLI, controller/route/view, config, test) vive ora in wm-package — vedi `wm-package/CLAUDE.md` per le decisioni di dettaglio (fix permessi Administrator, fix isolamento multi-app)
+- `app/Nova/EcPoi.php` è uno stub vuoto che estende `Wm\WmPackage\Nova\EcPoi` — non serve più override di `actions()` per questa feature
+- Env var rinominate: `OSM_IMPORT_REQUEST_DELAY_MS`/`OSM_IMPORT_MAX_IDS_PER_RUN` → `WM_OSM_IMPORT_REQUEST_DELAY_MS`/`WM_OSM_IMPORT_MAX_IDS_PER_RUN` — verificare `.env` di produzione al deploy se i valori erano stati tarati diversamente dai default (350ms/500)
+- Traduzioni fr/es/de per questa feature non sono state portate nel package (solo en/it) — regressione accettata esplicitamente, non un bug
+- Comando CLI rinominato `wm-package:import-ec-pois-from-osm` (era `maphub:import-ec-pois-from-osm`)
 
 ### CI/CD: gate migration wm-package + invalidazione cache permessi (oc:8218)
 
