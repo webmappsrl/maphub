@@ -14,6 +14,7 @@ use App\Nova\TaxonomyPoiType;
 use App\Nova\TaxonomyTheme;
 use App\Nova\TaxonomyWhere;
 use App\Nova\Tile;
+use App\Nova\UgcMedia;
 use App\Nova\UgcPoi;
 use App\Nova\UgcTrack;
 use App\Nova\User as NovaUser;
@@ -60,6 +61,7 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('UGC', [
                     MenuItem::resource(UgcPoi::class),
                     MenuItem::resource(UgcTrack::class),
+                    MenuItem::resource(UgcMedia::class),
                 ])->icon('document'),
 
                 MenuSection::make('EC', [
