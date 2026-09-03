@@ -60,7 +60,20 @@ class NovaServiceProvider extends NovaApplicationServiceProvider
                 MenuSection::make('UGC', [
                     MenuItem::resource(UgcPoi::class),
                     MenuItem::resource(UgcTrack::class),
-                ])->icon('document'),
+                ])->icon('document')
+                    ->canSee(function (Request $request) {
+                        $user = $request->user();
+
+                        if ($user->hasRole('Administrator') || $user->hasRole('Validator')) {
+                            return true;
+                        }
+
+                        if ($user->hasRole('Editor')) {
+                            return $user->hasUgcEnabled();
+                        }
+
+                        return false;
+                    }),
 
                 MenuSection::make('EC', [
                     MenuItem::resource(EcPoi::class),
