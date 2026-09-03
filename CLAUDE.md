@@ -203,6 +203,7 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 
 | Feature | Ticket | Moduli toccati | Note |
 |---|---|---|---|
+| Fix permessi e visibilità Nova per ruolo Editor | oc:8162 | `app/Providers/NovaServiceProvider.php` (`canSee()` su MenuSection UGC) — logica di business in `wm-package`, vedi `wm-package/CLAUDE.md` | Sezione menu UGC nascosta all'Editor se nessuna sua App ha UGC abilitato (`auth_show_at_startup && geolocation_record_enable`); sempre visibile ad Administrator/Validator. Consuma `Wm\WmPackage\Models\User::hasUgcEnabled()` |
 | Import EcPoi da OSM spostato in wm-package | oc:8239 | `app/Nova/EcPoi.php` (semplificato a stub), `wm-package/src/Nova/Actions/ImportEcPoiFromOsm.php` | Logica business rimossa da Maphub; l'azione arriva di default da `Wm\WmPackage\Nova\EcPoi::actions()`. Vedi `wm-package/CLAUDE.md` per i dettagli architetturali |
 | Import Layer: associazione EcPoi via taxonomy (theme/where/poi_type) | oc:8043 | `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Jobs/Import/ImportLayerJob.php`, `wm-package/config/wm-geohub-import.php`, `wm-package/tests/Feature/GeohubImportServiceAssociateLayerPoiTest.php` | `associateLayersWithEcPoi()` traversa tutti e tre i meccanismi taxonomy; taxonomy_theme è il primario per app 63 e app 44 |
 | Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
@@ -212,6 +213,11 @@ Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
 | Spostare test EcPoiOsmImportActionAvailableTest in wm-package | oc:8348 | `tests/Feature/Nova/EcPoiOsmImportActionAvailableTest.php` (eliminato), `wm-package/tests/Feature/Nova/Actions/ImportEcPoiFromOsmActionTest.php` | Test che referenziava direttamente una classe interna di wm-package spostato nel package stesso, per eliminare l'accoppiamento al puntatore submodule che aveva causato un errore PHPStan in CI |
 
 ## Decisioni architetturali
+
+### Fix permessi e visibilità Nova per ruolo Editor (oc:8162)
+- `canSee()` sulla sezione menu UGC: Administrator e Validator sempre `true`, Editor via `$user->hasUgcEnabled()` (metodo su `Wm\WmPackage\Models\User`, wm-package), altri ruoli `false` — la quasi totalità della logica di business (scoping per-app EC/UGC, Policy) vive in wm-package, vedi `wm-package/CLAUDE.md` per il dettaglio completo
+- Ordine di merge vincolante identico a oc:8348: wm-package prima, poi bump submodule + questa modifica nello stesso commit Maphub — `canSee()` chiama un metodo che esiste solo in wm-package, un ordine invertito rompe il rendering dell'intero menu Nova per ogni Editor
+- 3 bug trovati e corretti in fase di review formale post-implementazione (non dalle review per-task): uno di questi (`NovaServiceProvider::canSee()` alterato dopo l'approvazione) lato Maphub, gli altri due lato wm-package — vedi `docs/features/8162-.../notes.md`
 
 ### Spostare test EcPoiOsmImportActionAvailableTest in wm-package (oc:8348)
 - Root cause verificata via git archaeology: nel commit `c3d7876` (PR oc:8239 #14), il submodule `wm-package` era ancora puntato a un commit senza la classe `Wm\WmPackage\Nova\Actions\ImportEcPoiFromOsm`, causando l'errore PHPStan "Class ... not found" nella run CI #30. Un test in Maphub che referenzia direttamente classi interne di wm-package è strutturalmente fragile all'ordine di bump del puntatore submodule
