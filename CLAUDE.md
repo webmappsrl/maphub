@@ -1,300 +1,133 @@
-# Laravel PostGIS Boilerplate — CLAUDE.md
+# maphub — CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
+## Cos'è questo repo
+
+`maphub` è un prodotto Laravel del team Webmapp, costruito sul package condiviso **`wm-package`**,
+montato come submodule Git. Il package porta i modelli base, le risorse Nova, le policy di ruoli e
+permessi, i comandi artisan e gli stub delle migration; qui vive la customizzazione di questo
+prodotto — stub Nova, override, configurazione, pipeline.
+
+Lo stesso package è montato da altri prodotti (camminiditalia, osm2cai2): **una modifica a
+wm-package arriva anche a loro**, e ciò che vale solo per maphub resta qui.
+
 Stack: Laravel 12, PHP 8.4, PostgreSQL + PostGIS, Nova 5, Elasticsearch 8, Redis, Horizon.
 
-## Comandi utili
+## Regole del repo
 
-```bash
-# Formattazione codice
-composer format
+- **Le migration arrivano solo da git. Mai `vendor:publish` in deploy**, e mai
+  `vendor:publish --force` in locale: il gate CI verifica lo schema reale del database, e uno
+  publish sul server produce file che nessuno ha in git. `vendor:publish --tag=wm-package-migrations`
+  serve solo al bootstrap iniziale (`install.sh`).
+- **Prima wm-package, poi maphub.** Una modifica che attraversa i due repo si merge nel package per
+  prima, poi qui con il bump del submodule e il cambiamento nello stesso commit. L'ordine invertito
+  rompe cose che non sembrano collegate — il dettaglio è fra le trappole.
+- **Ciò che riguarda il package si documenta nel package**, non qui: questo file dice come lo usiamo,
+  come funziona lo dice `wm-package/CLAUDE.md`.
 
-# Avvio ambiente locale completo (serve + horizon + pail + vite)
-composer dev
+## Convenzioni
 
-# Entrare nel container PHP
-docker exec -it php-${APP_NAME} bash
+- **Gli ID dei ticket hanno la forma `oc:<numero>`** e vengono da Orchestrator. Ogni documento sotto
+  `docs/features/` inizia con `> Ticket: oc:<ID>`, lo slug della cartella è
+  `<ID>-<titolo-in-kebab-case>`, e lo scope dei commit porta il ticket: `fix(oc:<ID>): …`.
+- **`docs/` ha tre destinazioni**: `features/` è il cantiere di un lavoro (immutabile),
+  `knowledge/` la conoscenza per argomento, `howto/` le procedure. Le trappole non stanno in
+  nessuna delle tre: stanno in `.claude/rules/`.
+- **I nomi dei container usano il trattino come separatore**: `php-${APP_NAME}`,
+  `postgres-${APP_NAME}`, `horizon-${APP_NAME}`, `minio-${APP_NAME}`. Nei workflow CI sono però
+  scritti per esteso, non derivati da `${APP_NAME}` — vedi
+  [docs/knowledge/cicd-e-deploy.md](docs/knowledge/cicd-e-deploy.md).
+- **Documentazione, commenti e messaggi di commit sono in italiano**, i termini tecnici in inglese.
 
-# Eseguire un comando artisan senza entrare nel container
-docker exec -it php-${APP_NAME} php artisan <comando>
+## Comandi
 
-# Test (Pest)
-vendor/bin/pest
-vendor/bin/pest --filter=<nome-test>
+Come si mette in piedi l'ambiente la prima volta è in
+[docs/howto/avviare-il-progetto.md](docs/howto/avviare-il-progetto.md).
 
-# PHPStan
-vendor/bin/phpstan analyse
+| Cosa | Comando |
+|---|---|
+| Formattare | `composer format` |
+| Ambiente locale completo (serve + horizon + pail + vite) | `composer dev` |
+| Ambiente in Docker | `docker compose -f develop.compose.yml up -d` (con nginx) o `local.compose.yml` (standalone) |
+| Entrare nel container PHP | `docker exec -it php-${APP_NAME} bash` |
+| Un comando artisan senza entrare | `docker exec -it php-${APP_NAME} php artisan <comando>` |
+| Test | `vendor/bin/pest`, oppure `--filter=<nome-test>` |
+| Analisi statica | `vendor/bin/phpstan analyse` |
+| Migration di wm-package, dopo un bump del submodule | `php artisan wm-package:publish-missing-migrations --dry-run`, poi senza `--dry-run`, poi `php artisan migrate` — e si committano i file in `database/migrations/` |
 
-# Migration wm-package (dopo aggiornamento submodule)
-php artisan wm-package:publish-missing-migrations --dry-run
-php artisan wm-package:publish-missing-migrations
-php artisan migrate
-# Poi committare i file in database/migrations/
-```
-
-## Setup progetto
-
-Usare lo script `scripts/install.sh` per l'installazione guidata completa, oppure manualmente:
-
-```bash
-# 1. Configurare .env (copiare da .env-example)
-cp .env-example .env
-# Modificare: APP_NAME, DOCKER_PHP_PORT, DOCKER_PROJECT_DIR_NAME
-
-# 2. Avviare Docker
-bash docker/init-docker.sh
-
-# 3. Installare dipendenze e configurare Laravel
-docker exec -it php-${APP_NAME} composer install
-docker exec -it php-${APP_NAME} php artisan key:generate
-docker exec -it php-${APP_NAME} php artisan optimize
-# Bootstrap iniziale migration wm-package (solo prima installazione; vedi install.sh)
-docker exec -it php-${APP_NAME} php artisan vendor:publish --tag=wm-package-migrations
-docker exec -it php-${APP_NAME} php artisan migrate
-
-# 4. Creare ruoli base
-docker exec -it php-${APP_NAME} php artisan tinker --execute="
-foreach (['Administrator', 'Editor', 'Validator', 'Guest'] as \$name) {
-    \Spatie\Permission\Models\Role::firstOrCreate(['name' => \$name, 'guard_name' => 'web']);
-}
-"
-
-# 5. Creare utente Administrator
-docker exec -it php-${APP_NAME} php artisan nova:user
-```
-
-## Ambienti Docker
-
-Il progetto ha tre file compose con scopi distinti:
-
-| File | Scopo |
-|------|-------|
-| `compose.yml` | Base condivisa (prod). Non si usa direttamente. |
-| `develop.compose.yml` | Sviluppo locale con nginx/proxy. Aggiunge minio, mailpit. |
-| `local.compose.yml` | Sviluppo locale standalone con `php artisan serve`. Aggiunge scout-init, kibana, laravel server. |
-
-```bash
-# Produzione
-docker compose up -d
-
-# Sviluppo (con nginx)
-docker compose -f develop.compose.yml up -d
-
-# Sviluppo standalone (senza nginx)
-docker compose -f local.compose.yml up -d
-```
-
-### Convenzioni container name
-
-I container usano trattino come separatore: `php-${APP_NAME}`, `postgres-${APP_NAME}`, `horizon-${APP_NAME}`, `minio-${APP_NAME}`.
-
-## Stack Elasticsearch
-
-La sequenza di avvio è: `elasticsearch` → `elasticsearch-init` → `kibana`.
-
-`elasticsearch-init` è un container curl one-shot che imposta la password di `kibana_system` via API (Elasticsearch non supporta variabili d'ambiente per questo utente). Si rimuove automaticamente dopo l'esecuzione.
-
-`scout-init` (solo `local.compose.yml`) esegue `scout:import` sui modelli di wm-package dopo che Elasticsearch e il database sono pronti.
-
-Variabili `.env` rilevanti:
-```
-ELASTICSEARCH_HOST=elasticsearch:9200
-ELASTICSEARCH_USER=elastic
-ELASTICSEARCH_PASSWORD=changeme
-ELASTICSEARCH_SSL_VERIFICATION=false
-DOCKER_KIBANA_PORT=5601
-```
 
 ## Nova
 
 ### Gate
 
-`NovaServiceProvider::gate()` blocca i Guest da Nova:
+`NovaServiceProvider::gate()` definisce `viewNova` su un **permesso**, non su un ruolo:
 ```php
-return !$user->hasRole('Guest');
+return $user->can('access-nova');
 ```
+La logica del permesso vive in wm-package. Il perché in
+[docs/knowledge/nova-ruoli-e-permessi.md](docs/knowledge/nova-ruoli-e-permessi.md).
 
 ### Menu
 
 Il menu è strutturato per sezioni in `NovaServiceProvider::boot()`. Le sezioni Admin e Media sono visibili solo agli Administrator. Aggiungere nuove sezioni dopo quella Media.
 
-### Traits disponibili (`app/Nova/Traits/`)
+## Ruoli e permessi
 
-- `FiltersUsersByRoleTrait` — filtra gli utenti relatibili per ruolo (Administrator/Validator)
-- `HidesAppFromIndexTrait` — nasconde il campo `app` dalla lista index
+Il sistema usa `spatie/laravel-permission` tramite wm-package. **Guest non ha il permesso
+`access-nova`**, ed è così che resta fuori dal pannello — non per il suo ruolo.
 
-### Footer
+Le policy di Role e Permission sono registrate in `AppServiceProvider::boot()`; per aggiungerne una
+di prodotto: `Gate::policy(MyModel::class, MyModelPolicy::class);`.
 
-Il footer Nova viene renderizzato da `resources/views/nova/footer.blade.php` e mostra: nome app, versione, environment, versioni di Nova/Laravel/PHP.
+## MinIO e storage
 
-### Estensione risorse wm-package
+MinIO simula S3 negli ambienti di sviluppo; endpoint, porte e credenziali stanno nei file compose e
+in `.env-example`.
 
-Le risorse Nova nel progetto estendono quelle del wm-package. Pattern:
-```php
-namespace App\Nova;
+Il sistema di icone globale passa da `GlobalFileHelper` (wm-package), che tiene aggiornato
+`icons.json` su MinIO.
 
-use Wm\WmPackage\Nova\App as WmNovaApp;
+## Testing e analisi statica
 
-class App extends WmNovaApp {}
-```
+Il progetto usa **Pest**, configurato in `phpunit.xml`, che è anche dove vivono le variabili
+d'ambiente di testing. **PHPStan** è a livello 5, con la configurazione in `phpstan.neon.dist` e la
+baseline in `phpstan-baseline.neon`. I comandi sono sopra.
 
-Questo permette di personalizzare label, campi, o aggiungere funzionalità mantenendo la logica base nel package.
+**I test girano sul database di sviluppo**: in `phpunit.xml` le righe `DB_CONNECTION` e
+`DB_DATABASE` sono commentate, quindi vale la connessione del `.env`. È il motivo per cui si usa
+`DatabaseTransactions` e mai `RefreshDatabase`, che quel database lo svuoterebbe — sta fra le
+trappole.
 
-## Ruoli e Permessi
+## Dove sta wm-package
 
-Il sistema usa spatie/laravel-permission tramite wm-package. Ruoli predefiniti:
-- **Administrator** — accesso completo a Nova, gestione utenti e app
-- **Editor** — creazione e modifica contenuti
-- **Validator** — validazione UGC
-- **Guest** — solo lettura, NO accesso a Nova (bloccato dal gate)
+Il submodule vive in **`./wm-package`**, dichiarato in `composer.json` come repository di tipo
+`path`; `vendor/wm/wm-package` è un link simbolico che composer crea verso quella cartella — non
+una seconda copia. Si modifica sempre `./wm-package`.
 
-Le policy di Role e Permission sono registrate in `AppServiceProvider::boot()`. Per aggiungere policy progetto-specifiche:
-```php
-Gate::policy(MyModel::class, MyModelPolicy::class);
-```
+Cosa fornisce il package — modelli base, risorse Nova, policy, comandi, stub delle migration — sta
+nel suo `CLAUDE.md`.
 
-## PHPStan
+## Conoscenza
 
-```bash
-vendor/bin/phpstan analyse
-```
-
-Configurazione in `phpstan.neon.dist`. La baseline è `phpstan-baseline.neon`. Livello 5.
-
-## MinIO e Storage
-
-MinIO è disponibile negli ambienti di sviluppo per simulare S3. Endpoint: `http://localhost:${FORWARD_MINIO_PORT}` (default 9000). Console: port 8900.
-
-Credenziali default: `laravel` / `laravelminio`. Bucket: `wmfe`.
-
-Il sistema di icone globale è gestito tramite `GlobalFileHelper` (wm-package) che carica e mantiene aggiornato `icons.json` in MinIO.
-
-## Testing
-
-Il progetto usa Pest. Configurazione in `phpunit.xml`:
-```bash
-# Eseguire tutti i test
-vendor/bin/pest
-
-# Eseguire un file specifico
-vendor/bin/pest tests/Feature/EsempioTest.php
-
-# Con filtro
-vendor/bin/pest --filter=nome_test
-```
-
-Variabili d'ambiente di testing definite in `phpunit.xml`.
-
-## wm-package (submodule)
-
-Il progetto dipende da `wm/wm-package` come path repository (submodule Git in `../wm-package` o `vendor/wm/wm-package`).
-
-Il package fornisce:
-- Modelli base (User, EcTrack, EcPoi, UgcTrack, UgcPoi, Layer, App)
-- Risorse Nova base
-- Policy Role/Permission
-- Comandi artisan personalizzati
-- Migrazioni stub obbligatori — workflow: `wm-package:publish-missing-migrations` (vedi sezione oc:8218). `vendor:publish --tag=wm-package-migrations` solo bootstrap iniziale (`install.sh`), mai in deploy
-
-Quando si modifica il wm-package, ricordare che è condiviso tra progetti.
-
-## Feature disponibili
-
-| Feature | Ticket | Moduli toccati | Note |
+| Argomento | Cosa copre | Ticket | Pagina |
 |---|---|---|---|
-| Import Layer: associazione EcPoi via taxonomy (theme/where/poi_type) | oc:8043 | `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Jobs/Import/ImportLayerJob.php`, `wm-package/config/wm-geohub-import.php`, `wm-package/tests/Feature/GeohubImportServiceAssociateLayerPoiTest.php` | `associateLayersWithEcPoi()` traversa tutti e tre i meccanismi taxonomy; taxonomy_theme è il primario per app 63 e app 44 |
-| Utenti importati: ruolo Editor in import GeoHub | oc:8042 | `database/migrations/2026_06_26_135156_zz_2026_06_26_000001_add_editor_role.php`, `wm-package/src/Services/Import/GeohubImportService.php`, `wm-package/src/Services/RolesAndPermissionsService.php` | Migration pubblicata da wm-package (`insertOrIgnore`); `assignEditorRole()` condizionale su `roles->isNotEmpty()` |
-| Modifica ruolo utente in Nova | oc:8072 | `app/Nova/User.php`, `.env-example`, `tests/Feature/Nova/UserResourceRoleGuardTest.php` | Override `fields()` per `hideFromIndex()` su ruoli/permessi; guard via `WM_SUPER_ADMIN_EMAILS` |
-| CI/CD GitHub Actions con deploy automatico e smoke test | oc:8082 | `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `.github/workflows/notify-slack.yml`, `.github/workflows/run-tests.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `scripts/horizon_terminate_wait.sh`, `app/Listeners/CheckDatabaseHealth.php`, `app/Listeners/CheckCacheHealth.php`, `app/Providers/AppServiceProvider.php` | Pipeline CI/CD completa: tests → deploy SSH → smoke test (`/up` + `/login`) → notifica Slack `#zabbix-alerts`; listener `DiagnosingHealth` per check DB e cache su `/up` |
-| CI/CD: gate migration wm-package + invalidazione cache permessi | oc:8218 | `.github/workflows/run-tests.yml`, `.github/workflows/develop-deploy.yml`, `.github/workflows/prod-deploy.yml`, `scripts/deploy_dev.sh`, `scripts/deploy_prod.sh`, `wm-package/src/Commands/WmPackage{PublishMigration,PublishMissingMigrations}Command.php` | Gate CI: `publish-missing-migrations --dry-run` dopo migrate (stesso DB dei test). Deploy: `migrate` + `permission:cache-reset`, mai `vendor:publish` |
+| CI/CD e deploy | Pipeline, smoke test, nomi dei container, Horizon fra container | oc:8082 | [docs/knowledge/cicd-e-deploy.md](docs/knowledge/cicd-e-deploy.md) |
+| Confini con wm-package | Cosa vive nel package, gli stub Nova, i test da non accoppiare | oc:8239, oc:8348 | [docs/knowledge/confini-con-wm-package.md](docs/knowledge/confini-con-wm-package.md) |
+| Import da GeoHub | Associazione layer/POI via taxonomy, ruolo degli utenti importati | oc:8043, oc:8042 | [docs/knowledge/import-da-geohub.md](docs/knowledge/import-da-geohub.md) |
+| Migration e stub | Il gate che guarda lo schema, i tre comandi, cosa fare caso per caso | oc:8218 | [docs/knowledge/migration-e-stub.md](docs/knowledge/migration-e-stub.md) |
+| Elasticsearch | La sequenza di avvio e perché serve `elasticsearch-init` | — | [docs/knowledge/elasticsearch-e-avvio.md](docs/knowledge/elasticsearch-e-avvio.md) |
+| Nova: accesso e visibilità | Il gate su `access-nova`, il menu UGC per ruolo, gli override sull'index | oc:8161, oc:8162, oc:8072 | [docs/knowledge/nova-ruoli-e-permessi.md](docs/knowledge/nova-ruoli-e-permessi.md) |
 
-## Decisioni architetturali
+## Trappole
 
-### CI/CD: gate migration wm-package + invalidazione cache permessi (oc:8218)
+Stanno in `.claude/rules/wm-package-ordine-merge.md`, che si carica toccando `app/`,
+`database/migrations/`, i workflow o gli script: l'ordine di merge fra i due repo, i test da non
+accoppiare alle classi interne del package, l'override da ripetere negli altri consumer e
+`DatabaseTransactions` al posto di `RefreshDatabase`.
 
-**Fonte di verità:** `docs/features/8218-cicd-migration-wm-package-permission-cache/overview.md` (diagrammi mermaid + casi d'uso A–H).
+## Lavori senza una pagina dedicata
 
-**Principi:**
-- Stub wm-package **obbligatori** — il gate verifica lo **schema DB reale**, non suffissi file né mappature manuali
-- Migration solo via **git** — mai `vendor:publish` in deploy; mai `vendor:publish --force` in locale
-- Risoluzione sempre **locale → commit → push** — gli script deploy non generano file
-
-**Pipeline CI** (job `tests` in `run-tests.yml`, stesso DB PostGIS dei test):
-```
-migrate → publish-missing-migrations --dry-run → php artisan test → deploy (se passa)
-```
-`deploy` dipende solo da `tests`. Deploy: `migrate --force` → `permission:cache-reset` (sempre, incondizionato).
-
-**Comandi attivi (solo 2):**
-| Comando | Ruolo |
-|---------|--------|
-| `wm-package:publish-missing-migrations --dry-run` | Gate CI e verifica locale; **exit 1** se stub non allineati |
-| `wm-package:publish-missing-migrations` | Pubblica file mancanti in `database/migrations/` |
-| `wm-package:publish-migration <stub>` | Publish singolo stub; ignora falsi positivi da suffisso |
-
-**Logica gate per stub** (dopo `migrate`):
-1. Schema DB completo rispetto allo stub → allineato (anche senza file wm-package, se un'altra migration ha lo stesso effetto)
-2. File committato **identico** allo stub ma non in tabella `migrations` → exit 1, esegui `migrate`
-3. Gap schema e nessun file identico → exit 1, pubblica migration wm-package
-
-**Caso noto maphub:** `create_users_table` — `0001_..._create_users_table.php` è Laravel (`Schema::create`); stub wm-package aggiunge `balance`/`fiscal_code`/`app_id` via `Schema::table`. Suffisso uguale ≠ schema allineato.
-
-**Casi d'uso rapidi per agenti:**
-| Scenario | Azione |
-|----------|--------|
-| Push normale, tutto allineato | `--dry-run` exit 0 → CI passa |
-| Nuovo stub dopo update wm-package | `publish-missing-migrations` → `migrate` → commit |
-| `--dry-run` segnala stub + gap colonne | Pubblica migration wm-package, non basta il file Laravel omonimo |
-| File identico in git, non migrato | Solo `php artisan migrate` |
-| Schema già ok via migration custom (nome diverso) | Nessuna azione |
-| CI fallisce | Fix in locale, mai publish sul server |
-
-
-### Import Layer: associazione EcPoi via taxonomy (oc:8043)
-- `associateLayersWithEcPoi()` controlla in sequenza `taxonomy_themeables`, `taxonomy_whereables` e `taxonomy_poi_typeables` — **taxonomy_theme è il meccanismo primario** per app 63 e app 44 (poi per layer: 4–48 su 63, 101–109 su 44)
-- GeoHub non ha pivot diretta Layer→EcPoi: la relazione è indiretta via taxonomy condivise tra Layer e EcPoi
-- I geohub_poi_id vengono deduplicati prima dell'`attach()` per gestire POI trovati da più meccanismi contemporaneamente
-- `attach()` con check `alreadyExists` garantisce idempotenza sul re-import
-
-### Utenti importati: ruolo Editor (oc:8042)
-- `GeohubImportService::assignEditorRole()` assegna `Editor` solo se `$user->roles->isEmpty()` — non sovrascrive ruoli manuali
-- Migration usa `insertOrIgnore` invece di `Role::firstOrCreate` per evitare side-effect cache Spatie in transazione PostgreSQL
-- `assignAdministratorRole()` conservato per retrocompatibilità ma non più usato in `checkUserExistence()`
-
-### Modifica ruolo utente in Nova (oc:8072)
-- `app/Nova/User.php` estende `AbstractUserResource` (wm-package) — non ridefinisce i campi base, li eredita tutti
-- Override `fields()` locale aggiunge `hideFromIndex()` su `RoleBooleanGroup` e `PermissionBooleanGroup` — il package resta agnostico sulla visibilità nell'index
-- `DatabaseTransactions` invece di `RefreshDatabase` nei test: `phpunit.xml` non configura un DB separato, `RefreshDatabase` svuoterebbe il DB di dev
-- Gli altri shard che aggiornano wm-package devono fare lo stesso override `hideFromIndex()` in `User.php`, altrimenti i campi ruolo/permessi appaiono come colonne nell'index
-
-### CI/CD GitHub Actions (oc:8082)
-- Container name hardcoded (`php-maphub`, `php-maphubdev`): pattern Webmapp confermato da camminiditalia — non usare `${APP_NAME}` che dipende dall'env del server
-- `horizon:terminate` usa Redis come canale di comunicazione, funziona correttamente tra container separati (`php-maphub` e `horizon-maphub`)
-- Smoke test aggiunge `sleep 15` prima dei curl per evitare falsi negativi da connection pool esaurito post-migrate
-- Loop attesa Horizon estratto in `scripts/horizon_terminate_wait.sh` e sourcato da entrambi i deploy script
-- Job Slack estratto in workflow riusabile `notify-slack.yml` per evitare duplicazione
-
-## Migration wm-package (stub obbligatori)
-
-Gli stub in `wm-package/database/migrations/*.stub` **non sono opzionali**. Dettaglio completo: `docs/features/8218-cicd-migration-wm-package-permission-cache/overview.md`.
-
-### Workflow (dopo aggiornamento wm-package)
-
-```bash
-php artisan wm-package:publish-missing-migrations --dry-run   # = gate CI
-php artisan wm-package:publish-missing-migrations             # se exit 1
-php artisan migrate
-git add database/migrations/ && git commit
-php artisan wm-package:publish-missing-migrations --dry-run   # verifica
-```
-
-### Se `--dry-run` fallisce (exit 1)
-
-Risoluzione **sempre in locale → git**, mai sul server:
-
-1. Leggi `wm-package/database/migrations/<nome>.php.stub`
-2. Cerca migration equivalente in `database/migrations/` (per **contenuto/schema**, non solo nome)
-3. **Schema già allineato sul DB** → nessuna azione (se fallisce comunque, verifica `migrate`)
-4. **Gap sul DB** → `publish-migration <stub>` o `publish-missing-migrations` + `migrate` + commit
-5. **File identico committato ma non migrato** → `php artisan migrate`
+| Lavoro | Ticket | In breve |
+|---|---|---|
+| Import GeoHub esteso a UGC, media e autori | oc:8158 | Qui è stata pubblicata solo la migration stub `Contributor`; il resto del lavoro vive in wm-package. `docs/features/8158-import-geohub-estensione-ugc-poi-track-media-e-utenti-autori-ugc/` |

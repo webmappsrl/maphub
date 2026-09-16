@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Guida a Vivi Lama</title>
+<style>
+  :root {
+    --verde-scuro: #14532d;
+    --verde: #2f855a;
+    --arancio: #e07a29;
+    --testo: #1f2933;
+    --sfondo: #fbfbf9;
+    --bordo: #e3e0d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--testo);
+    background: var(--sfondo);
+    line-height: 1.55;
+  }
+  header.hero {
+    background: var(--verde-scuro);
+    color: #fff;
+    padding: 48px 20px 40px;
+    text-align: center;
+  }
+  header.hero h1 {
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+  }
+  header.hero p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+  nav.toc {
+    max-width: 720px;
+    margin: -24px auto 40px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+  nav.toc h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--verde);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    columns: 2;
+    margin: 0;
+    padding-left: 20px;
+  }
+  nav.toc li { margin-bottom: 6px; }
+  nav.toc a { color: var(--testo); text-decoration: none; }
+  nav.toc a:hover { color: var(--verde); text-decoration: underline; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+  section {
+    margin-top: 56px;
+    scroll-margin-top: 20px;
+  }
+  section h2 {
+    color: var(--verde-scuro);
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--verde);
+    padding-bottom: 8px;
+  }
+  section h3 {
+    color: var(--verde-scuro);
+    font-size: 1.1rem;
+    margin-top: 28px;
+  }
+  .shots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 20px 0;
+    justify-content: center;
+  }
+  figure {
+    margin: 0;
+    max-width: 220px;
+    text-align: center;
+  }
+  figure img {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--bordo);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  figcaption {
+    font-size: 0.82rem;
+    color: #556;
+    margin-top: 8px;
+  }
+  .avviso {
+    background: #fff4ea;
+    border-left: 4px solid var(--arancio);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 18px 0;
+  }
+  .avviso strong { color: var(--arancio); }
+  .faq dt {
+    font-weight: 600;
+    color: var(--verde-scuro);
+    margin-top: 18px;
+  }
+  .faq dd { margin: 6px 0 0; }
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    color: #667;
+    font-size: 0.85rem;
+  }
+  a.back-top {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--verde);
+  }
+  @media (max-width: 480px) {
+    nav.toc ol { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <h1>Guida a Vivi Lama</h1>
+  <p>Come usare la web app dei percorsi del territorio di Lama Mocogno</p>
+</header>
+
+<nav class="toc">
+  <h2>In questa guida</h2>
+  <ol>
+    <li><a href="#cose">Cos'è Vivi Lama</a></li>
+    <li><a href="#come-fatta">Come è fatta l'app</a></li>
+    <li><a href="#home">La Home</a></li>
+    <li><a href="#raccolte">Le raccolte di percorsi</a></li>
+    <li><a href="#scheda-percorso">La scheda di un percorso</a></li>
+    <li><a href="#poi">I punti di interesse</a></li>
+    <li><a href="#mappa">La mappa</a></li>
+    <li><a href="#offline">Usare l'app senza connessione</a></li>
+    <li><a href="#profilo">Profilo e impostazioni</a></li>
+    <li><a href="#faq">Domande frequenti</a></li>
+  </ol>
+</nav>
+
+<main>
+
+  <section id="cose">
+    <h2>1. Cos'è Vivi Lama</h2>
+    <p>Vivi Lama è la web app con i percorsi e i punti di interesse del territorio di Lama
+    Mocogno, pensata per chi vuole camminare o pedalare sul territorio. Non serve installarla
+    da nessuno store: si apre direttamente dal browser del telefono.</p>
+    <p>Puoi trovarla inquadrando il QR code sui pannelli informativi lungo i percorsi, oppure
+    aprendo l'indirizzo <strong>2.maphub.it</strong> dal browser.</p>
+    <p>Per un accesso più comodo, puoi aggiungere l'app alla schermata Home del telefono:</p>
+    <ul>
+      <li><strong>iPhone (Safari):</strong> tocca l'icona di condivisione e scegli "Aggiungi a Home".</li>
+      <li><strong>Android (Chrome):</strong> apri il menu con i tre puntini e scegli "Aggiungi a schermata Home".</li>
+    </ul>
+    <p>La stessa app, aperta da un computer, mostra un layout diverso a due colonne (elenco a
+    sinistra, mappa a destra): questa guida descrive la versione da telefono, quella che
+    userai davvero sul posto.</p>
+  </section>
+
+  <section id="come-fatta">
+    <h2>2. Come è fatta l'app</h2>
+    <p>In basso trovi sempre tre voci: <strong>Home</strong>, <strong>Mappa</strong> e
+    <strong>Profilo</strong>. Sono il modo principale per muoverti nell'app.</p>
+    <p>Quando apri un percorso o un punto di interesse, i contenuti si aprono in un pannello
+    che scorre dal basso sopra la mappa. Se il pannello non si allunga muovendo la rotellina o
+    scorrendo con un dito, trascina verso l'alto la barretta grigia che trovi in cima al
+    pannello.</p>
+  </section>
+
+  <section id="home">
+    <h2>3. La Home: ricerca e raccolte</h2>
+    <p>Aprendo l'app arrivi sulla Home, con il logo, la barra <strong>Cerca</strong> e le
+    raccolte di percorsi disponibili.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/01-home.png" alt="Home dell'app Vivi Lama">
+        <figcaption>La Home: barra Cerca e raccolte di percorsi</figcaption>
+      </figure>
+      <figure>
+        <img src="images/02-ricerca.png" alt="Risultati di ricerca per Piane">
+        <figcaption>Cercando un nome (es. "Piane") i risultati si dividono in Sentieri e POI</figcaption>
+      </figure>
+    </div>
+    <p>Puoi cercare un percorso o un punto di interesse per nome dalla barra Cerca: i
+    risultati compaiono divisi in due schede, <strong>SENTIERI</strong> e <strong>POI</strong>,
+    ciascuna con il numero di risultati trovati.</p>
+  </section>
+
+  <section id="raccolte">
+    <h2>4. Le raccolte di percorsi</h2>
+    <p>Nella Home i percorsi sono raggruppati in raccolte tematiche (ad esempio "Percorsi
+    Bike"). Toccando una raccolta passi alla Mappa, con tutti i tracciati della raccolta
+    evidenziati.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/03-raccolta-mappa.png" alt="Raccolta Percorsi Bike aperta sulla mappa">
+        <figcaption>Raccolta aperta: mappa con i tracciati e pannello in basso</figcaption>
+      </figure>
+      <figure>
+        <img src="images/03b-raccolta-lista.png" alt="Elenco dei sentieri della raccolta">
+        <figcaption>Trascinando il pannello verso l'alto vedi l'elenco dei sentieri, con comune e lunghezza</figcaption>
+      </figure>
+    </div>
+    <p>Trascinando verso l'alto la barretta in cima al pannello vedi l'elenco dei sentieri
+    della raccolta, con il comune di partenza, il nome del percorso e la sua lunghezza.</p>
+  </section>
+
+  <section id="scheda-percorso">
+    <h2>5. La scheda di un percorso</h2>
+    <p>Aprendo un percorso vedi il tracciato sulla mappa e, nel pannello in basso, i dati
+    tecnici: distanza, durata stimata, dislivello, quota di partenza, minima e massima.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/04-dettaglio-mappa.png" alt="Dettaglio di un percorso con dati tecnici">
+        <figcaption>Mappa del percorso e Dettagli tecnici (distanza, durata, dislivello, quote)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/05-dettaglio-dati.png" alt="Sezione Dove e Attività di un percorso">
+        <figcaption>Scorrendo il pannello trovi anche "Dove" (comune, regione) e "Attività"</figcaption>
+      </figure>
+      <figure>
+        <img src="images/05b-profilo-altimetrico.png" alt="Profilo altimetrico colorato per pendenza">
+        <figcaption>Per i percorsi più lunghi la mappa mostra anche il profilo altimetrico, colorato in base alla pendenza</figcaption>
+      </figure>
+    </div>
+    <p>Scorrendo il pannello trovi anche a quale comune e regione appartiene il percorso, e a
+    quale tipo di attività è adatto (ad esempio Mountain Bike).</p>
+    <p>Oltre ai dati tecnici, alcuni percorsi hanno anche una breve descrizione testuale: se
+    è presente viene mostrata nella scheda, altrimenti non compare.</p>
+    <p>Sul bordo destro della mappa trovi tre pulsanti utili mentre guardi un percorso:</p>
+    <ul>
+      <li><strong>Condividi</strong> (icona a rete): invia il link del percorso ad altri, ad
+      esempio via WhatsApp o email.</li>
+      <li><strong>Scarica</strong> (freccia verso il basso): avvia il download del percorso per
+      usarlo offline — vedi il capitolo "Usare l'app senza connessione".</li>
+      <li><strong>Posizione</strong> (mirino): centra la mappa sulla tua posizione attuale, utile
+      per capire dove ti trovi rispetto al tracciato.</li>
+    </ul>
+    <div class="shots">
+      <figure>
+        <img src="images/04b-pulsanti-scheda.png" alt="I tre pulsanti sul bordo destro della mappa: Condividi, Scarica, Posizione">
+        <figcaption>I tre pulsanti sul bordo destro della mappa: Condividi, Scarica, Posizione</figcaption>
+      </figure>
+    </div>
+    <p>La prima volta che tocchi Posizione, il browser del telefono chiede il permesso di
+    accedere alla tua posizione: tocca <strong>Consenti</strong> per continuare. Se concedi il
+    permesso, un pallino blu mostra dove ti trovi sulla mappa, insieme a qualche pulsante
+    aggiuntivo per gestire la visualizzazione (tra cui uno per chiuderla).</p>
+    <div class="shots">
+      <figure>
+        <img src="images/13-posizione-attiva.png" alt="Posizione attiva sulla mappa">
+        <figcaption>Con il permesso concesso, un pallino blu mostra la tua posizione in tempo reale</figcaption>
+      </figure>
+    </div>
+    <p>La localizzazione è disponibile solo da smartphone: se apri Vivi Lama da computer questa
+    funzione non c'è.</p>
+    <p>Se non vedi il pallino blu, controlla di aver concesso il permesso di localizzazione al
+    browser e che la localizzazione sia attiva nelle impostazioni del telefono — vedi anche le
+    Domande frequenti.</p>
+  </section>
+
+  <section id="poi">
+    <h2>6. I punti di interesse</h2>
+    <p>Oltre ai percorsi, sulla mappa trovi anche i punti di interesse: fontane, punti
+    panoramici, edifici storici e altri luoghi segnalati lungo il territorio, rappresentati
+    da icone colorate. Quando più punti sono vicini tra loro, l'app li raggruppa in un
+    cerchio numerato: toccandolo la mappa si avvicina e i punti si separano.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/10-poi-dettaglio.png" alt="Dettaglio di un punto di interesse">
+        <figcaption>Dettaglio di un punto di interesse: nome, dettagli tecnici e comune</figcaption>
+      </figure>
+    </div>
+    <p>Toccando un'icona si apre la scheda del punto di interesse, con nome, dettagli tecnici
+    (ad esempio la quota) e il comune in cui si trova.</p>
+  </section>
+
+  <section id="mappa">
+    <h2>7. La mappa: filtri e tipo di mappa</h2>
+    <h3>Filtrare i punti di interesse</h3>
+    <p>In alto sulla mappa trovi il pulsante <strong>Filtri</strong>. Toccandolo e poi
+    toccando la riga "Punti di interesse" si apre l'elenco delle categorie disponibili, ognuna
+    con il numero di punti presenti (ad esempio Bar, B&amp;B, Bancomat...).</p>
+    <div class="shots">
+      <figure>
+        <img src="images/08-filtri-categorie.png" alt="Elenco delle categorie di punti di interesse">
+        <figcaption>Elenco delle categorie di punti di interesse, con il conteggio per ciascuna</figcaption>
+      </figure>
+      <figure>
+        <img src="images/08b-filtri-attivi.png" alt="Filtro attivo sulla categoria Bar">
+        <figcaption>Con un filtro attivo la mappa mostra solo quella categoria; puoi rimuoverlo con la X o con "RESET FILTRI"</figcaption>
+      </figure>
+    </div>
+    <p>Toccando una categoria, la mappa mostra solo quel tipo di punti. In alto compare
+    "Filtri attivi" con il numero di filtri applicati: puoi togliere un singolo filtro
+    toccando la X sul suo tag, oppure toccare "RESET FILTRI" per rimuoverli tutti.</p>
+
+    <h3>Cambiare tipo di mappa</h3>
+    <p>Il pulsante con l'icona a strati, in alto a destra vicino a "Filtri", apre un pannello
+    con due sezioni: <strong>Tipo mappa</strong> (per passare dalla mappa "Webmapp" alla
+    vista Satellite) e <strong>Dati</strong> (per mostrare o nascondere i percorsi).</p>
+    <div class="shots">
+      <figure>
+        <img src="images/09-livelli.png" alt="Pannello Tipo mappa e Dati">
+        <figcaption>Pannello con Tipo mappa (Webmapp / Satellite) e Dati (Percorsi)</figcaption>
+      </figure>
+      <figure>
+        <img src="images/09b-satellite.png" alt="Mappa in vista satellite">
+        <figcaption>La stessa zona in vista Satellite</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="offline">
+    <h2>8. Usare l'app senza connessione</h2>
+    <p>Se vai in zone senza campo o segnale, puoi scaricare un percorso in anticipo per
+    continuare a usarlo offline.</p>
+    <div class="avviso">
+      <strong>Prima di partire</strong>, con il telefono connesso al Wi-Fi o con buona
+      copertura, apri il percorso che ti interessa e scaricalo.
+    </div>
+    <p>Apri la scheda del percorso e tocca l'icona di download (la freccia verso il basso, tra
+    le icone sulla destra della mappa). Vedrai una schermata con l'avanzamento del download
+    della mappa e dei contenuti multimediali.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/06-download-avvio.png" alt="Download in corso">
+        <figcaption>Download in corso: avanzamento della mappa e dei contenuti multimediali</figcaption>
+      </figure>
+      <figure>
+        <img src="images/06b-download-completato.png" alt="Download completato">
+        <figcaption>Download completato, con il pulsante "VAI AI MIEI DOWNLOAD"</figcaption>
+      </figure>
+    </div>
+    <div class="avviso">
+      <strong>Non chiudere l'app</strong> durante il download: l'avviso compare anche nella
+      schermata di avanzamento.
+    </div>
+    <p>Da "VAI AI MIEI DOWNLOAD" (raggiungibile anche da Profilo → Downloads → Tracce
+    scaricate) trovi l'elenco dei percorsi scaricati, con la lunghezza, lo spazio occupato e
+    un pulsante ELIMINA per liberare spazio quando non ti servono più.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/07-miei-download.png" alt="Elenco dei percorsi scaricati">
+        <figcaption>"I miei downloads": percorso scaricato con lunghezza, dimensione e pulsante ELIMINA</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="profilo">
+    <h2>9. Profilo e impostazioni</h2>
+    <p>Dalla voce <strong>Profilo</strong> in basso trovi la sezione "I tuoi dati", con i
+    Downloads e le Tracce scaricate.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/11-profilo.png" alt="Sezione Profilo dell'app">
+        <figcaption>Profilo: Downloads e Tracce scaricate</figcaption>
+      </figure>
+      <figure>
+        <img src="images/12-impostazioni.png" alt="Schermata Impostazioni">
+        <figcaption>Impostazioni: versione dell'app, opzione "Rimani acceso", pagine informative e reset della memoria</figcaption>
+      </figure>
+    </div>
+    <p>Toccando l'ingranaggio in alto a destra nel Profilo apri le <strong>Impostazioni</strong>,
+    dove trovi la versione dell'app, l'opzione "Rimani acceso" (per impedire che lo schermo si
+    spenga da solo durante l'uso), i link a Progetto, Disclaimer, Credits e Privacy, e la
+    possibilità di "Resettare la memoria" dell'app.</p>
+    <p>"Rimani acceso" ha un interruttore, "Forza il dispositivo a non spegnersi": attivalo
+    prima di metterti in cammino così lo schermo resta acceso mentre segui il percorso, senza
+    che tu debba sbloccare il telefono di continuo (tieni presente che consuma più batteria).</p>
+    <p>Il pulsante "Resetta la memoria", nella sezione Memoria, cancella tutti i dati salvati
+    localmente dall'app — comprese le tracce scaricate — liberando lo spazio occupato: è lo
+    stesso strumento suggerito nelle Domande frequenti per liberare spazio quando i download
+    sono troppi. Dopo averlo usato dovrai riscaricare i percorsi che vuoi continuare a usare
+    offline.</p>
+  </section>
+
+  <section id="faq">
+    <h2>10. Domande frequenti</h2>
+    <dl class="faq">
+      <dt>Devo registrarmi per usare l'app?</dt>
+      <dd>No, puoi cercare percorsi, punti di interesse e scaricarli offline senza creare un
+      account.</dd>
+
+      <dt>L'app mi guida passo passo come un navigatore?</dt>
+      <dd>No, Vivi Lama ti mostra il percorso sulla mappa con tutti i suoi dati, ma non offre
+      indicazioni vocali o turn-by-turn come un navigatore per auto.</dd>
+
+      <dt>Quanto sono affidabili i tempi di percorrenza indicati?</dt>
+      <dd>Sono stime calcolate sul tracciato: il tempo reale dipende dal tuo passo, dalle
+      condizioni del terreno e dalle soste che farai.</dd>
+
+      <dt>Ho scaricato un percorso ma non lo trovo più: dove guardo?</dt>
+      <dd>In Profilo → I tuoi dati → Downloads → Tracce scaricate trovi l'elenco completo di
+      ciò che hai scaricato.</dd>
+
+      <dt>La posizione sulla mappa non si aggiorna: cosa controllo?</dt>
+      <dd>Verifica che l'app mobile abbia il permesso di accedere alla posizione del telefono e
+      che la localizzazione (GPS) sia attiva nelle impostazioni del telefono. Ricorda che la
+      geolocalizzazione funziona solo da smartphone: aprendo Vivi Lama da computer questa
+      funzione non è disponibile.</dd>
+
+      <dt>I download occupano troppo spazio: come li tolgo?</dt>
+      <dd>Da "I miei downloads" tocca ELIMINA sul percorso che non ti serve più; per liberare
+      tutto lo spazio usato dall'app puoi anche usare "Resetta la memoria" nelle
+      Impostazioni.</dd>
+    </dl>
+    <div class="avviso">
+      <strong>In escursione</strong>, porta sempre con te acqua, un abbigliamento adeguato e
+      informa qualcuno del percorso che stai per fare: l'app è un supporto all'orientamento,
+      non sostituisce la prudenza sul territorio.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Guida a Vivi Lama — <a href="https://2.maphub.it/" style="color:inherit;">2.maphub.it</a>
+  <br>
+  <a class="back-top" href="#cose">↑ Torna all'indice</a>
+</footer>
+
+</body>
+</html>
