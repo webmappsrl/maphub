@@ -21,6 +21,8 @@ l'anteprima locale.
 
 ## Vincoli globali
 
+> ⚠️ Due vincoli sono stati superati durante il lavoro: `13-posizione-attiva.png` è stata rifatta ([notes.md](notes.md#task-2-sostituire-gli-screenshot-esistenti)) e la PR va su `develop` ([notes.md](notes.md#task-7-commit-e-pr)).
+
 - Repo: solo `maphub`, nessun submodule. File: `docs/guide/vivi-lama/come-usare-la-app/index.html`
   e `docs/guide/vivi-lama/come-usare-la-app/images/`.
 - Fonte delle catture: **https://2.maphub.it**, mai il database locale.
@@ -190,6 +192,8 @@ Se la welcome è la Home stessa, ingrandita, `01b-welcome.png` non si crea e bas
 - [ ] **Step 5:** dev controlla l'anteprima.
 
 ### Task 7: commit e PR (solo dopo review-gate e approvazione del dev)
+
+> ⚠️ L'implementazione ha deviato da questo task: [notes.md](notes.md#task-7-commit-e-pr)
 
 - [ ] **Step 1:** commit su `feature/oc-8685-aggiornamento-guida-utente-vivi-lama`, per esempio:
   ```

@@ -28,6 +28,7 @@
   del download (06, 06b, 07) usano «Anello Piane - Centocroci». Prima erano usati tre percorsi
   diversi («Alpe Sigola», «Monte Cantiere e Monte S. Andrea» e un terzo); un solo percorso rende
   la sequenza più facile da seguire.
+- **`13-posizione-attiva.png`** rifatta anche lei, contro il vincolo iniziale: vedi Decisioni.
 - **`07-miei-download.png`**: il pulsante «VAI AI MIEI DOWNLOAD» oggi riporta alla mappa, quindi
   la cattura è fatta da Profilo → Tracce scaricate, che apre la schermata «Downloads».
 
@@ -55,6 +56,15 @@
 - Link agli store nella guida inglese senza il prefisso del paese
   (`https://apps.apple.com/app/vivi-lama/id6769355992`), così l'App Store apre la pagina del
   paese di chi legge.
+
+### Task 7: commit e PR
+
+- **PR su `develop`, non su `main`** (cambiato dal dev prima del commit): inizialmente la PR
+  doveva andare direttamente su `main`, che è il branch da cui GitHub Pages pubblica. Il dev ha
+  poi scelto il flusso abituale: il branch è stato spostato su `origin/develop` (`041d1fd`)
+  prima del commit, la PR va su `develop` e le guide si pubblicano con il merge da `develop` a
+  `main`. Verificato prima dello spostamento che `develop` e `main` avessero lo stesso
+  contenuto (`git diff origin/develop origin/main` vuoto), quindi nessun conflitto.
 
 ## Bug trovati
 
@@ -94,12 +104,10 @@ Nessuno.
   (`build/phpstan/cache`, «Unable to create file … Container_760b584183.php»), quindi l'analisi
   non parte (`errors: 1, file_errors: 0`, due tentativi). Il diff contiene solo HTML, PNG e
   Markdown, nessun file PHP da analizzare.
-- **PR su `develop`, non su `main`** (cambiato dal dev prima del commit): inizialmente la PR
-  doveva andare direttamente su `main`, che è il branch da cui GitHub Pages pubblica. Il dev ha
-  poi scelto il flusso abituale: il branch è stato spostato su `origin/develop` (`041d1fd`)
-  prima del commit, la PR va su `develop` e le guide si pubblicano con il merge da `develop` a
-  `main`. Verificato prima dello spostamento che `develop` e `main` avessero lo stesso
-  contenuto (`git diff origin/develop origin/main` vuoto), quindi nessun conflitto.
+- **Procedura per rifare gli screenshot** (`docs/howto/rifare-gli-screenshot-delle-guide.md`),
+  scritta a fine lavoro: era fuori scope nell'overview iniziale, ma senza di essa il metodo
+  (393×800 ridotto, Chrome di sistema, lingua forzata, posizione simulata, ritaglio di `04b`)
+  andava riscoperto alla prossima modifica dell'app.
 
 ## Follow-up
 
