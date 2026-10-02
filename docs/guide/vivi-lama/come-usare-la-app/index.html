@@ -6,8 +6,8 @@
 <title>Guida a Vivi Lama</title>
 <style>
   :root {
-    --verde-scuro: #14532d;
-    --verde: #2f855a;
+    --verde: #75980d;       /* primary color dell'app Vivi Lama */
+    --verde-scuro: #4f660a; /* stessa tonalità, più scura: titoli e testi colorati leggibili sullo sfondo chiaro */
     --arancio: #e07a29;
     --testo: #1f2933;
     --sfondo: #fbfbf9;
@@ -22,11 +22,31 @@
     line-height: 1.55;
   }
   header.hero {
-    background: var(--verde-scuro);
+    background: var(--verde);
     color: #fff;
     padding: 48px 20px 40px;
     text-align: center;
   }
+  header.hero .logo {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  header.hero .lang-switch {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--verde-scuro);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  header.hero .lang-switch:hover { text-decoration: underline; }
   header.hero h1 {
     margin: 0 0 8px;
     font-size: 1.8rem;
@@ -49,7 +69,7 @@
     font-size: 0.95rem;
     text-transform: uppercase;
     letter-spacing: 0.04em;
-    color: var(--verde);
+    color: var(--verde-scuro);
     margin: 0 0 12px;
   }
   nav.toc ol {
@@ -59,7 +79,7 @@
   }
   nav.toc li { margin-bottom: 6px; }
   nav.toc a { color: var(--testo); text-decoration: none; }
-  nav.toc a:hover { color: var(--verde); text-decoration: underline; }
+  nav.toc a:hover { color: var(--verde-scuro); text-decoration: underline; }
 
   main {
     max-width: 720px;
@@ -128,7 +148,7 @@
     display: inline-block;
     margin-top: 10px;
     font-size: 0.8rem;
-    color: var(--verde);
+    color: var(--verde-scuro);
   }
   @media (max-width: 480px) {
     nav.toc ol { columns: 1; }
@@ -138,8 +158,10 @@
 <body>
 
 <header class="hero">
+  <img class="logo" src="images/logo-vivi-lama.png" alt="Logo di Vivi Lama" width="120" height="120">
   <h1>Guida a Vivi Lama</h1>
-  <p>Come usare la web app dei percorsi del territorio di Lama Mocogno</p>
+  <p>Come usare l'app dei percorsi del territorio di Lama Mocogno</p>
+  <a class="lang-switch" href="../how-to-use-the-app/" hreflang="en" lang="en">English version</a>
 </header>
 
 <nav class="toc">
@@ -162,19 +184,14 @@
 
   <section id="cose">
     <h2>1. Cos'è Vivi Lama</h2>
-    <p>Vivi Lama è la web app con i percorsi e i punti di interesse del territorio di Lama
-    Mocogno, pensata per chi vuole camminare o pedalare sul territorio. Non serve installarla
-    da nessuno store: si apre direttamente dal browser del telefono.</p>
-    <p>Puoi trovarla inquadrando il QR code sui pannelli informativi lungo i percorsi, oppure
-    aprendo l'indirizzo <strong>2.maphub.it</strong> dal browser.</p>
-    <p>Per un accesso più comodo, puoi aggiungere l'app alla schermata Home del telefono:</p>
+    <p>Vivi Lama è l'app con i percorsi e i punti di interesse del territorio di Lama
+    Mocogno, pensata per chi vuole camminare o pedalare sul territorio.</p>
+    <p>Si installa gratuitamente dallo store del telefono:</p>
     <ul>
-      <li><strong>iPhone (Safari):</strong> tocca l'icona di condivisione e scegli "Aggiungi a Home".</li>
-      <li><strong>Android (Chrome):</strong> apri il menu con i tre puntini e scegli "Aggiungi a schermata Home".</li>
+      <li><strong>iPhone:</strong> <a href="https://apps.apple.com/it/app/vivi-lama/id6769355992">Vivi Lama su App Store</a></li>
+      <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=it.lamamocogno.vivilama">Vivi Lama su Google Play</a></li>
     </ul>
-    <p>La stessa app, aperta da un computer, mostra un layout diverso a due colonne (elenco a
-    sinistra, mappa a destra): questa guida descrive la versione da telefono, quella che
-    userai davvero sul posto.</p>
+    <p>In alternativa, apri l'App Store o Google Play sul telefono e cerca "Vivi Lama".</p>
   </section>
 
   <section id="come-fatta">
@@ -189,15 +206,17 @@
 
   <section id="home">
     <h2>3. La Home: ricerca e raccolte</h2>
-    <p>Aprendo l'app arrivi sulla Home, con il logo, la barra <strong>Cerca</strong> e le
-    raccolte di percorsi disponibili.</p>
+    <p>Aprendo l'app arrivi sulla Home: in alto il logo di Vivi Lama, grande, con il nome
+    dell'app; sotto la barra <strong>Cerca</strong> e, scorrendo, le raccolte di percorsi
+    disponibili. Tra queste trovi anche la voce <strong>Come usare l'app</strong>, che apre
+    questa guida.</p>
     <div class="shots">
       <figure>
         <img src="images/01-home.png" alt="Home dell'app Vivi Lama">
-        <figcaption>La Home: barra Cerca e raccolte di percorsi</figcaption>
+        <figcaption>La Home: logo di Vivi Lama, barra Cerca e, più in basso, le raccolte di percorsi</figcaption>
       </figure>
       <figure>
-        <img src="images/02-ricerca.png" alt="Risultati di ricerca per Piane">
+        <img loading="lazy" src="images/02-ricerca.png" alt="Risultati di ricerca per Piane">
         <figcaption>Cercando un nome (es. "Piane") i risultati si dividono in Sentieri e POI</figcaption>
       </figure>
     </div>
@@ -213,11 +232,11 @@
     evidenziati.</p>
     <div class="shots">
       <figure>
-        <img src="images/03-raccolta-mappa.png" alt="Raccolta Percorsi Bike aperta sulla mappa">
+        <img loading="lazy" src="images/03-raccolta-mappa.png" alt="Raccolta Percorsi Bike aperta sulla mappa">
         <figcaption>Raccolta aperta: mappa con i tracciati e pannello in basso</figcaption>
       </figure>
       <figure>
-        <img src="images/03b-raccolta-lista.png" alt="Elenco dei sentieri della raccolta">
+        <img loading="lazy" src="images/03b-raccolta-lista.png" alt="Elenco dei sentieri della raccolta">
         <figcaption>Trascinando il pannello verso l'alto vedi l'elenco dei sentieri, con comune e lunghezza</figcaption>
       </figure>
     </div>
@@ -227,20 +246,38 @@
 
   <section id="scheda-percorso">
     <h2>5. La scheda di un percorso</h2>
-    <p>Aprendo un percorso vedi il tracciato sulla mappa e, nel pannello in basso, i dati
-    tecnici: distanza, durata stimata, dislivello, quota di partenza, minima e massima.</p>
+    <p>Aprendo un percorso vedi il tracciato sulla mappa e, nel pannello in basso, il nome del
+    percorso con la <strong>Modalità di percorrenza</strong>.</p>
+    <p>La modalità di percorrenza ha due pulsanti: <strong>a piedi</strong> (l'omino) e
+    <strong>in bici</strong> (la bicicletta). Sotto trovi la lunghezza del percorso e
+    l'<strong>Orario previsto</strong>, che cambia in base alla modalità scelta: per l'Anello
+    Piane - Centocroci, ad esempio, sono 7 h 34 m a piedi e 2 h 30 m in bici. All'apertura è
+    selezionata la modalità a piedi.</p>
     <div class="shots">
       <figure>
-        <img src="images/04-dettaglio-mappa.png" alt="Dettaglio di un percorso con dati tecnici">
+        <img loading="lazy" src="images/05c-modalita-percorrenza.png" alt="Modalità di percorrenza a piedi, con lunghezza e orario previsto">
+        <figcaption>Modalità a piedi: lunghezza e orario previsto per chi cammina</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/05d-modalita-bici.png" alt="Modalità di percorrenza in bici, con l'orario previsto ricalcolato">
+        <figcaption>Toccando la bicicletta l'orario previsto si ricalcola per chi pedala</figcaption>
+      </figure>
+    </div>
+    <p>Scorrendo il pannello trovi il profilo altimetrico e i <strong>Dettagli tecnici</strong>:
+    distanza, durata stimata, dislivello, quota di partenza, minima e massima. La durata dei
+    Dettagli tecnici è sempre quella a piedi, anche se hai scelto la bici.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/04-dettaglio-mappa.png" alt="Dettaglio di un percorso con dati tecnici">
         <figcaption>Mappa del percorso e Dettagli tecnici (distanza, durata, dislivello, quote)</figcaption>
       </figure>
       <figure>
-        <img src="images/05-dettaglio-dati.png" alt="Sezione Dove e Attività di un percorso">
+        <img loading="lazy" src="images/05-dettaglio-dati.png" alt="Sezione Dove e Attività di un percorso">
         <figcaption>Scorrendo il pannello trovi anche "Dove" (comune, regione) e "Attività"</figcaption>
       </figure>
       <figure>
-        <img src="images/05b-profilo-altimetrico.png" alt="Profilo altimetrico colorato per pendenza">
-        <figcaption>Per i percorsi più lunghi la mappa mostra anche il profilo altimetrico, colorato in base alla pendenza</figcaption>
+        <img loading="lazy" src="images/05b-profilo-altimetrico.png" alt="Profilo altimetrico colorato per pendenza">
+        <figcaption>Il profilo altimetrico, colorato in base alla pendenza</figcaption>
       </figure>
     </div>
     <p>Scorrendo il pannello trovi anche a quale comune e regione appartiene il percorso, e a
@@ -258,24 +295,23 @@
     </ul>
     <div class="shots">
       <figure>
-        <img src="images/04b-pulsanti-scheda.png" alt="I tre pulsanti sul bordo destro della mappa: Condividi, Scarica, Posizione">
+        <img loading="lazy" src="images/04b-pulsanti-scheda.png" alt="I tre pulsanti sul bordo destro della mappa: Condividi, Scarica, Posizione">
         <figcaption>I tre pulsanti sul bordo destro della mappa: Condividi, Scarica, Posizione</figcaption>
       </figure>
     </div>
-    <p>La prima volta che tocchi Posizione, il browser del telefono chiede il permesso di
+    <p>La prima volta che tocchi Posizione, il telefono chiede il permesso di
     accedere alla tua posizione: tocca <strong>Consenti</strong> per continuare. Se concedi il
-    permesso, un pallino blu mostra dove ti trovi sulla mappa, insieme a qualche pulsante
-    aggiuntivo per gestire la visualizzazione (tra cui uno per chiuderla).</p>
+    permesso, un pallino blu mostra dove ti trovi sulla mappa e in basso a destra compaiono tre
+    pulsanti per gestire la visualizzazione: una <strong>freccia</strong>, una
+    <strong>bussola</strong> e una <strong>X</strong>, che la chiude.</p>
     <div class="shots">
       <figure>
-        <img src="images/13-posizione-attiva.png" alt="Posizione attiva sulla mappa">
-        <figcaption>Con il permesso concesso, un pallino blu mostra la tua posizione in tempo reale</figcaption>
+        <img loading="lazy" src="images/13-posizione-attiva.png" alt="Posizione attiva sulla mappa, con il pallino blu e i pulsanti freccia, bussola e X">
+        <figcaption>Con il permesso concesso, un pallino blu mostra la tua posizione; in basso a destra i pulsanti freccia, bussola e X</figcaption>
       </figure>
     </div>
-    <p>La localizzazione è disponibile solo da smartphone: se apri Vivi Lama da computer questa
-    funzione non c'è.</p>
-    <p>Se non vedi il pallino blu, controlla di aver concesso il permesso di localizzazione al
-    browser e che la localizzazione sia attiva nelle impostazioni del telefono — vedi anche le
+    <p>Se non vedi il pallino blu, controlla di aver concesso il permesso di localizzazione
+    all'app e che la localizzazione sia attiva nelle impostazioni del telefono — vedi anche le
     Domande frequenti.</p>
   </section>
 
@@ -287,7 +323,7 @@
     cerchio numerato: toccandolo la mappa si avvicina e i punti si separano.</p>
     <div class="shots">
       <figure>
-        <img src="images/10-poi-dettaglio.png" alt="Dettaglio di un punto di interesse">
+        <img loading="lazy" src="images/10-poi-dettaglio.png" alt="Dettaglio di un punto di interesse">
         <figcaption>Dettaglio di un punto di interesse: nome, dettagli tecnici e comune</figcaption>
       </figure>
     </div>
@@ -303,11 +339,11 @@
     con il numero di punti presenti (ad esempio Bar, B&amp;B, Bancomat...).</p>
     <div class="shots">
       <figure>
-        <img src="images/08-filtri-categorie.png" alt="Elenco delle categorie di punti di interesse">
+        <img loading="lazy" src="images/08-filtri-categorie.png" alt="Elenco delle categorie di punti di interesse">
         <figcaption>Elenco delle categorie di punti di interesse, con il conteggio per ciascuna</figcaption>
       </figure>
       <figure>
-        <img src="images/08b-filtri-attivi.png" alt="Filtro attivo sulla categoria Bar">
+        <img loading="lazy" src="images/08b-filtri-attivi.png" alt="Filtro attivo sulla categoria Bar">
         <figcaption>Con un filtro attivo la mappa mostra solo quella categoria; puoi rimuoverlo con la X o con "RESET FILTRI"</figcaption>
       </figure>
     </div>
@@ -315,17 +351,51 @@
     "Filtri attivi" con il numero di filtri applicati: puoi togliere un singolo filtro
     toccando la X sul suo tag, oppure toccare "RESET FILTRI" per rimuoverli tutti.</p>
 
+    <h3>Filtrare i percorsi</h3>
+    <p>Nello stesso pannello <strong>Filtri</strong> trovi anche la riga "Percorsi", con il
+    numero di percorsi presenti sulla mappa. Toccandola si aprono le raccolte di percorsi (ad
+    esempio "Via Vandelli" e "Percorsi Bike"), ognuna con il numero di percorsi che contiene.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/08c-filtro-percorsi.png" alt="Elenco delle raccolte di percorsi nel pannello Filtri">
+        <figcaption>La riga "Percorsi" aperta: le raccolte, con il numero di percorsi di ciascuna</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/08d-filtro-percorsi-attivo.png" alt="Filtro attivo sulla raccolta Via Vandelli">
+        <figcaption>Con il filtro "Via Vandelli" attivo la mappa mostra solo i percorsi di quella raccolta</figcaption>
+      </figure>
+    </div>
+    <p>Toccando una raccolta, sulla mappa restano solo i suoi percorsi. Come per i punti di
+    interesse, il filtro compare in "Filtri attivi" e si toglie con la X o con "RESET
+    FILTRI".</p>
+
+    <h3>Combinare i filtri</h3>
+    <p>I filtri sui percorsi e quelli sui punti di interesse si possono usare insieme. Ad
+    esempio, se vuoi percorrere la Via Vandelli e cerchi dove dormire, apri
+    <strong>Filtri</strong>, tocca "Percorsi" e scegli "Via Vandelli", poi tocca "Punti di
+    interesse" e scegli "B&amp;B". In alto compare "Filtri attivi 2", con i due filtri uno
+    accanto all'altro: sulla mappa restano solo i percorsi della Via Vandelli e solo i B&amp;B,
+    senza gli altri punti di interesse.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/08e-filtri-combinati.png" alt="Filtri attivi su Via Vandelli e B&amp;B insieme">
+        <figcaption>Due filtri insieme: i percorsi della Via Vandelli e i B&amp;B</figcaption>
+      </figure>
+    </div>
+    <p>Per togliere uno solo dei due filtri tocca la X sul suo tag; "RESET FILTRI" li toglie
+    entrambi.</p>
+
     <h3>Cambiare tipo di mappa</h3>
     <p>Il pulsante con l'icona a strati, in alto a destra vicino a "Filtri", apre un pannello
     con due sezioni: <strong>Tipo mappa</strong> (per passare dalla mappa "Webmapp" alla
     vista Satellite) e <strong>Dati</strong> (per mostrare o nascondere i percorsi).</p>
     <div class="shots">
       <figure>
-        <img src="images/09-livelli.png" alt="Pannello Tipo mappa e Dati">
+        <img loading="lazy" src="images/09-livelli.png" alt="Pannello Tipo mappa e Dati">
         <figcaption>Pannello con Tipo mappa (Webmapp / Satellite) e Dati (Percorsi)</figcaption>
       </figure>
       <figure>
-        <img src="images/09b-satellite.png" alt="Mappa in vista satellite">
+        <img loading="lazy" src="images/09b-satellite.png" alt="Mappa in vista satellite">
         <figcaption>La stessa zona in vista Satellite</figcaption>
       </figure>
     </div>
@@ -344,25 +414,25 @@
     della mappa e dei contenuti multimediali.</p>
     <div class="shots">
       <figure>
-        <img src="images/06-download-avvio.png" alt="Download in corso">
+        <img loading="lazy" src="images/06-download-avvio.png" alt="Download in corso">
         <figcaption>Download in corso: avanzamento della mappa e dei contenuti multimediali</figcaption>
       </figure>
       <figure>
-        <img src="images/06b-download-completato.png" alt="Download completato">
-        <figcaption>Download completato, con il pulsante "VAI AI MIEI DOWNLOAD"</figcaption>
+        <img loading="lazy" src="images/06b-download-completato.png" alt="Download completato">
+        <figcaption>Download completato: il percorso è disponibile anche senza connessione</figcaption>
       </figure>
     </div>
     <div class="avviso">
       <strong>Non chiudere l'app</strong> durante il download: l'avviso compare anche nella
       schermata di avanzamento.
     </div>
-    <p>Da "VAI AI MIEI DOWNLOAD" (raggiungibile anche da Profilo → Downloads → Tracce
-    scaricate) trovi l'elenco dei percorsi scaricati, con la lunghezza, lo spazio occupato e
-    un pulsante ELIMINA per liberare spazio quando non ti servono più.</p>
+    <p>Da Profilo → Downloads → <strong>Tracce scaricate</strong> trovi l'elenco dei percorsi
+    scaricati, con la lunghezza, lo spazio occupato e la voce <strong>Elimina</strong> per
+    liberare spazio quando non ti servono più.</p>
     <div class="shots">
       <figure>
-        <img src="images/07-miei-download.png" alt="Elenco dei percorsi scaricati">
-        <figcaption>"I miei downloads": percorso scaricato con lunghezza, dimensione e pulsante ELIMINA</figcaption>
+        <img loading="lazy" src="images/07-miei-download.png" alt="Elenco dei percorsi scaricati">
+        <figcaption>"Downloads": percorso scaricato con dimensione, lunghezza e la voce Elimina</figcaption>
       </figure>
     </div>
   </section>
@@ -373,18 +443,27 @@
     Downloads e le Tracce scaricate.</p>
     <div class="shots">
       <figure>
-        <img src="images/11-profilo.png" alt="Sezione Profilo dell'app">
+        <img loading="lazy" src="images/11-profilo.png" alt="Sezione Profilo dell'app">
         <figcaption>Profilo: Downloads e Tracce scaricate</figcaption>
       </figure>
       <figure>
-        <img src="images/12-impostazioni.png" alt="Schermata Impostazioni">
-        <figcaption>Impostazioni: versione dell'app, opzione "Rimani acceso", pagine informative e reset della memoria</figcaption>
+        <img loading="lazy" src="images/12-impostazioni.png" alt="Schermata Impostazioni">
+        <figcaption>Impostazioni: versione dell'app, lingua, opzione "Rimani acceso", pagine informative e reset della memoria</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/12b-lingua.png" alt="Finestra per scegliere la lingua dell'app">
+        <figcaption>Toccando "Lingua" scegli fra italiano (it) e inglese (en), poi confermi con OK</figcaption>
       </figure>
     </div>
     <p>Toccando l'ingranaggio in alto a destra nel Profilo apri le <strong>Impostazioni</strong>,
-    dove trovi la versione dell'app, l'opzione "Rimani acceso" (per impedire che lo schermo si
+    dove trovi la versione dell'app, la lingua, l'opzione "Rimani acceso" (per impedire che lo schermo si
     spenga da solo durante l'uso), i link a Progetto, Disclaimer, Credits e Privacy, e la
     possibilità di "Resettare la memoria" dell'app.</p>
+    <p>Toccando <strong>Lingua</strong> si apre una finestra in cui scegli fra italiano
+    (<strong>it</strong>) e inglese (<strong>en</strong>): seleziona la lingua e tocca
+    <strong>OK</strong>. La stessa finestra si apre anche dalla Mappa, con il pulsante a forma
+    di globo accanto a "Filtri". Alla prima apertura l'app usa la lingua del telefono, se è
+    fra quelle disponibili; altrimenti parte in italiano.</p>
     <p>"Rimani acceso" ha un interruttore, "Forza il dispositivo a non spegnersi": attivalo
     prima di metterti in cammino così lo schermo resta acceso mentre segui il percorso, senza
     che tu debba sbloccare il telefono di continuo (tieni presente che consuma più batteria).</p>
@@ -407,21 +486,21 @@
       indicazioni vocali o turn-by-turn come un navigatore per auto.</dd>
 
       <dt>Quanto sono affidabili i tempi di percorrenza indicati?</dt>
-      <dd>Sono stime calcolate sul tracciato: il tempo reale dipende dal tuo passo, dalle
-      condizioni del terreno e dalle soste che farai.</dd>
+      <dd>Sono stime calcolate sul tracciato. L'orario previsto in cima alla scheda cambia in
+      base alla modalità di percorrenza scelta (a piedi o in bici), mentre la durata nei
+      Dettagli tecnici è quella a piedi. In ogni caso il tempo reale dipende dal tuo passo,
+      dalle condizioni del terreno e dalle soste che farai.</dd>
 
       <dt>Ho scaricato un percorso ma non lo trovo più: dove guardo?</dt>
       <dd>In Profilo → I tuoi dati → Downloads → Tracce scaricate trovi l'elenco completo di
       ciò che hai scaricato.</dd>
 
       <dt>La posizione sulla mappa non si aggiorna: cosa controllo?</dt>
-      <dd>Verifica che l'app mobile abbia il permesso di accedere alla posizione del telefono e
-      che la localizzazione (GPS) sia attiva nelle impostazioni del telefono. Ricorda che la
-      geolocalizzazione funziona solo da smartphone: aprendo Vivi Lama da computer questa
-      funzione non è disponibile.</dd>
+      <dd>Verifica che l'app abbia il permesso di accedere alla posizione del telefono e
+      che la localizzazione (GPS) sia attiva nelle impostazioni del telefono.</dd>
 
       <dt>I download occupano troppo spazio: come li tolgo?</dt>
-      <dd>Da "I miei downloads" tocca ELIMINA sul percorso che non ti serve più; per liberare
+      <dd>Da Profilo → Downloads → Tracce scaricate tocca Elimina sul percorso che non ti serve più; per liberare
       tutto lo spazio usato dall'app puoi anche usare "Resetta la memoria" nelle
       Impostazioni.</dd>
     </dl>
@@ -435,7 +514,10 @@
 </main>
 
 <footer>
-  Guida a Vivi Lama — <a href="https://2.maphub.it/" style="color:inherit;">2.maphub.it</a>
+  Guida a Vivi Lama — <a href="https://apps.apple.com/it/app/vivi-lama/id6769355992" style="color:inherit;">App Store</a> ·
+  <a href="https://play.google.com/store/apps/details?id=it.lamamocogno.vivilama" style="color:inherit;">Google Play</a>
+  <br>
+  App sviluppata da <a href="https://webmapp.it/" style="color:inherit;">Webmapp</a>
   <br>
   <a class="back-top" href="#cose">↑ Torna all'indice</a>
 </footer>

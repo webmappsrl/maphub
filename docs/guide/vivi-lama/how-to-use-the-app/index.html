@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vivi Lama Guide</title>
+<style>
+  :root {
+    --verde: #75980d;       /* Vivi Lama app primary color */
+    --verde-scuro: #4f660a; /* same hue, darker: readable headings and coloured text on the light background */
+    --arancio: #e07a29;
+    --testo: #1f2933;
+    --sfondo: #fbfbf9;
+    --bordo: #e3e0d8;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--testo);
+    background: var(--sfondo);
+    line-height: 1.55;
+  }
+  header.hero {
+    background: var(--verde);
+    color: #fff;
+    padding: 48px 20px 40px;
+    text-align: center;
+  }
+  header.hero .logo {
+    display: block;
+    width: 120px;
+    height: 120px;
+    margin: 0 auto 16px;
+    background: #fff;
+    border-radius: 50%;
+  }
+  header.hero .lang-switch {
+    display: inline-block;
+    margin-top: 16px;
+    padding: 6px 14px;
+    border-radius: 999px;
+    background: #fff;
+    color: var(--verde-scuro);
+    font-weight: 600;
+    font-size: 0.9rem;
+    text-decoration: none;
+  }
+  header.hero .lang-switch:hover { text-decoration: underline; }
+  header.hero h1 {
+    margin: 0 0 8px;
+    font-size: 1.8rem;
+  }
+  header.hero p {
+    margin: 0;
+    opacity: 0.9;
+    font-size: 1rem;
+  }
+  nav.toc {
+    max-width: 720px;
+    margin: -24px auto 40px;
+    background: #fff;
+    border: 1px solid var(--bordo);
+    border-radius: 12px;
+    padding: 20px 24px;
+    box-shadow: 0 4px 14px rgba(0,0,0,0.06);
+  }
+  nav.toc h2 {
+    font-size: 0.95rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--verde-scuro);
+    margin: 0 0 12px;
+  }
+  nav.toc ol {
+    columns: 2;
+    margin: 0;
+    padding-left: 20px;
+  }
+  nav.toc li { margin-bottom: 6px; }
+  nav.toc a { color: var(--testo); text-decoration: none; }
+  nav.toc a:hover { color: var(--verde-scuro); text-decoration: underline; }
+
+  main {
+    max-width: 720px;
+    margin: 0 auto;
+    padding: 0 20px 60px;
+  }
+  section {
+    margin-top: 56px;
+    scroll-margin-top: 20px;
+  }
+  section h2 {
+    color: var(--verde-scuro);
+    font-size: 1.4rem;
+    border-bottom: 2px solid var(--verde);
+    padding-bottom: 8px;
+  }
+  section h3 {
+    color: var(--verde-scuro);
+    font-size: 1.1rem;
+    margin-top: 28px;
+  }
+  .shots {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 18px;
+    margin: 20px 0;
+    justify-content: center;
+  }
+  figure {
+    margin: 0;
+    max-width: 220px;
+    text-align: center;
+  }
+  figure img {
+    width: 100%;
+    border-radius: 10px;
+    border: 1px solid var(--bordo);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  }
+  figcaption {
+    font-size: 0.82rem;
+    color: #556;
+    margin-top: 8px;
+  }
+  .avviso {
+    background: #fff4ea;
+    border-left: 4px solid var(--arancio);
+    padding: 12px 16px;
+    border-radius: 6px;
+    margin: 18px 0;
+  }
+  .avviso strong { color: var(--arancio); }
+  .faq dt {
+    font-weight: 600;
+    color: var(--verde-scuro);
+    margin-top: 18px;
+  }
+  .faq dd { margin: 6px 0 0; }
+  footer {
+    text-align: center;
+    padding: 30px 20px 50px;
+    color: #667;
+    font-size: 0.85rem;
+  }
+  a.back-top {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 0.8rem;
+    color: var(--verde-scuro);
+  }
+  @media (max-width: 480px) {
+    nav.toc ol { columns: 1; }
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <img class="logo" src="images/logo-vivi-lama.png" alt="Vivi Lama logo" width="120" height="120">
+  <h1>Vivi Lama Guide</h1>
+  <p>How to use the app with the routes of the Lama Mocogno area</p>
+  <a class="lang-switch" href="../come-usare-la-app/" hreflang="it" lang="it">Versione italiana</a>
+</header>
+
+<nav class="toc">
+  <h2>In this guide</h2>
+  <ol>
+    <li><a href="#cose">What Vivi Lama is</a></li>
+    <li><a href="#come-fatta">How the app is organised</a></li>
+    <li><a href="#home">Home</a></li>
+    <li><a href="#raccolte">Route collections</a></li>
+    <li><a href="#scheda-percorso">Route details</a></li>
+    <li><a href="#poi">Points of interest</a></li>
+    <li><a href="#mappa">The map</a></li>
+    <li><a href="#offline">Using the app offline</a></li>
+    <li><a href="#profilo">Profile and settings</a></li>
+    <li><a href="#faq">Frequently asked questions</a></li>
+  </ol>
+</nav>
+
+<main>
+
+  <section id="cose">
+    <h2>1. What Vivi Lama is</h2>
+    <p>Vivi Lama is the app with the routes and points of interest of the Lama Mocogno area,
+    designed for people who want to walk or cycle around the territory.</p>
+    <p>You can install it for free from your phone's store:</p>
+    <ul>
+      <li><strong>iPhone:</strong> <a href="https://apps.apple.com/app/vivi-lama/id6769355992">Vivi Lama on the App Store</a></li>
+      <li><strong>Android:</strong> <a href="https://play.google.com/store/apps/details?id=it.lamamocogno.vivilama">Vivi Lama on Google Play</a></li>
+    </ul>
+    <p>Alternatively, open the App Store or Google Play on your phone and search for "Vivi Lama".</p>
+    <p>The app interface is available in English; route names, descriptions and points of
+    interest are shown as they were published, often in Italian.</p>
+  </section>
+
+  <section id="come-fatta">
+    <h2>2. How the app is organised</h2>
+    <p>At the bottom of the screen you always find three items: <strong>Home</strong>,
+    <strong>Map</strong> and <strong>Profile</strong>. They are the main way to move around the
+    app.</p>
+    <p>When you open a route or a point of interest, the content opens in a panel that slides up
+    from the bottom over the map. If the panel does not expand when you scroll, drag the small
+    grey bar at the top of the panel upwards.</p>
+  </section>
+
+  <section id="home">
+    <h2>3. Home: search and collections</h2>
+    <p>When you open the app you land on the Home screen: at the top the large Vivi Lama logo
+    with the app name; below it the <strong>Search</strong> bar and, further down, the available
+    route collections. Among them you also find <strong>How to use the app</strong>, which opens
+    this guide.</p>
+    <div class="shots">
+      <figure>
+        <img src="images/01-home.png" alt="Vivi Lama Home screen">
+        <figcaption>Home: Vivi Lama logo, Search bar and, further down, the route collections</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/02-ricerca.png" alt="Search results for Piane">
+        <figcaption>Searching for a name (e.g. "Piane") splits the results into Trails and POI</figcaption>
+      </figure>
+    </div>
+    <p>You can search for a route or a point of interest by name from the Search bar: the
+    results are split into two tabs, <strong>TRAILS</strong> and <strong>POI</strong>, each showing
+    the number of results found. <strong>Back to Home</strong> clears the search.</p>
+  </section>
+
+  <section id="raccolte">
+    <h2>4. Route collections</h2>
+    <p>On the Home screen, routes are grouped into themed collections (for example "Bike
+    routes"). Tapping a collection takes you to the Map, with all the routes of the collection
+    highlighted.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/03-raccolta-mappa.png" alt="Bike routes collection open on the map">
+        <figcaption>Collection open: map with the routes and panel at the bottom</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/03b-raccolta-lista.png" alt="List of the trails in the collection">
+        <figcaption>Dragging the panel up shows the list of trails, with municipality and length</figcaption>
+      </figure>
+    </div>
+    <p>Drag the bar at the top of the panel upwards to see the list of trails in the
+    collection, with the starting municipality, the route name and its length.</p>
+  </section>
+
+  <section id="scheda-percorso">
+    <h2>5. Route details</h2>
+    <p>When you open a route you see it on the map and, in the panel at the bottom, the route
+    name with the <strong>Travel mode</strong>.</p>
+    <p>Travel mode has two buttons: <strong>on foot</strong> (the walking figure)
+    and <strong>by bike</strong> (the bicycle). Below it you find the route
+    <strong>Length</strong> and the <strong>Expected time</strong>, which changes with the mode
+    you choose: for the Anello Piane - Centocroci, for example, it is 7 h 34 m on foot and
+    2 h 30 m by bike. When the route opens, on foot is selected.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/05c-modalita-percorrenza.png" alt="Travel mode on foot, with length and expected time">
+        <figcaption>On foot: length and expected time for walkers</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/05d-modalita-bici.png" alt="Travel mode by bike, with the expected time recalculated">
+        <figcaption>Tapping the bicycle recalculates the expected time for cyclists</figcaption>
+      </figure>
+    </div>
+    <p>Scrolling the panel you find the elevation profile and the <strong>Technical
+    Details</strong>: Distance, Duration, Slope (the elevation gain), Starting Elevation, Min
+    Elevation and Max Elevation. The Duration in the Technical Details is always the walking time,
+    even if you selected the bike.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/04-dettaglio-mappa.png" alt="Route details with technical data">
+        <figcaption>Route map and Technical Details (distance, duration, elevation gain, elevations)</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/05-dettaglio-dati.png" alt="Where and Activities sections of a route">
+        <figcaption>Scrolling the panel you also find "Where" (municipality, region) and "Activities"</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/05b-profilo-altimetrico.png" alt="Elevation profile coloured by slope">
+        <figcaption>The elevation profile, coloured according to the slope</figcaption>
+      </figure>
+    </div>
+    <p>Scrolling the panel you also find which municipality and region the route belongs to,
+    and which activity it suits (for example Mountain Bike).</p>
+    <p>Besides the technical data, some routes also have a short text description: if there is
+    one it is shown in the details, otherwise it does not appear.</p>
+    <p>On the right edge of the map there are three useful buttons while you look at a route:</p>
+    <ul>
+      <li><strong>Share</strong> (network icon): send the route link to others, for example via
+      WhatsApp or email.</li>
+      <li><strong>Download</strong> (down arrow): start downloading the route to use it offline —
+      see "Using the app offline".</li>
+      <li><strong>Location</strong> (crosshair): centre the map on your current position, useful
+      to see where you are compared to the route.</li>
+    </ul>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/04b-pulsanti-scheda.png" alt="The three buttons on the right edge of the map: Share, Download, Location">
+        <figcaption>The three buttons on the right edge of the map: Share, Download, Location</figcaption>
+      </figure>
+    </div>
+    <p>The first time you tap Location, the phone asks for permission to access your position:
+    tap <strong>Allow</strong> to continue. Once you allow it, a blue dot shows where you are on
+    the map and three buttons appear in the bottom right to manage the view: an
+    <strong>arrow</strong>, a <strong>compass</strong> and an <strong>X</strong>, which closes it.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/13-posizione-attiva.png" alt="Location active on the map, with the blue dot and the arrow, compass and X buttons">
+        <figcaption>With permission granted, a blue dot shows your position; in the bottom right the arrow, compass and X buttons</figcaption>
+      </figure>
+    </div>
+    <p>If you do not see the blue dot, check that you have allowed the app to use your location
+    and that location is turned on in your phone settings — see also the Frequently asked
+    questions.</p>
+  </section>
+
+  <section id="poi">
+    <h2>6. Points of interest</h2>
+    <p>Besides routes, the map also shows points of interest: fountains, viewpoints, historic
+    buildings and other places across the territory, shown as coloured icons. When several
+    points are close together, the app groups them into a numbered circle: tap it and the map
+    zooms in and the points separate.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/10-poi-dettaglio.png" alt="Details of a point of interest">
+        <figcaption>Details of a point of interest: name, category, technical details and municipality</figcaption>
+      </figure>
+    </div>
+    <p>Tapping an icon opens the point of interest details, with its name, Technical Details
+    (for example the Elevation) and the municipality where it is.</p>
+  </section>
+
+  <section id="mappa">
+    <h2>7. The map: filters and map type</h2>
+    <h3>Filtering points of interest</h3>
+    <p>At the top of the map there is the <strong>Filters</strong> button. Tap it and then tap
+    the "Points of interest" row to open the list of available categories, each with the number
+    of points (for example Bar, B&amp;B, ATM...).</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/08-filtri-categorie.png" alt="List of point of interest categories">
+        <figcaption>List of point of interest categories, with the count for each</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/08b-filtri-attivi.png" alt="Filter active on the Bar category">
+        <figcaption>With a filter active the map shows only that category; remove it with the X or with "RESET FILTERS"</figcaption>
+      </figure>
+    </div>
+    <p>Tapping a category, the map shows only that type of point. At the top "Active Filters"
+    appears with the number of filters applied: you can remove a single filter by tapping the X
+    on its tag, or tap "RESET FILTERS" to remove them all.</p>
+
+    <h3>Filtering routes</h3>
+    <p>In the same <strong>Filters</strong> panel you also find the "Routes" row, with the number
+    of routes on the map. Tapping it opens the route collections (for example "Via Vandelli" and
+    "Percorsi Bike"), each with the number of routes it contains.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/08c-filtro-percorsi.png" alt="List of route collections in the Filters panel">
+        <figcaption>The "Routes" row open: the collections, with the number of routes in each</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/08d-filtro-percorsi-attivo.png" alt="Filter active on the Via Vandelli collection">
+        <figcaption>With the "Via Vandelli" filter active the map shows only the routes of that collection</figcaption>
+      </figure>
+    </div>
+    <p>Tapping a collection leaves only its routes on the map. As with points of interest, the
+    filter appears under "Active Filters" and you remove it with the X or with "RESET
+    FILTERS".</p>
+
+    <h3>Combining filters</h3>
+    <p>Route filters and point of interest filters can be used together. For example, if you
+    plan to walk the Via Vandelli and are looking for somewhere to sleep, open
+    <strong>Filters</strong>, tap "Routes" and choose "Via Vandelli", then tap "Points of
+    interest" and choose "B&amp;B". "Active Filters 2" appears at the top, with the two filters
+    side by side: the map shows only the Via Vandelli routes and only the B&amp;Bs, without the
+    other points of interest.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/08e-filtri-combinati.png" alt="Filters active on Via Vandelli and B&amp;B together">
+        <figcaption>Two filters together: the Via Vandelli routes and the B&amp;Bs</figcaption>
+      </figure>
+    </div>
+    <p>To remove only one of the two filters, tap the X on its tag; "RESET FILTERS" removes
+    both.</p>
+
+    <h3>Changing the map type</h3>
+    <p>The layers button, at the top right next to "Filters", opens a panel with two sections
+    (shown in Italian as <strong>"Tipo mappa"</strong> and <strong>"Dati"</strong>): the map type,
+    to switch from the "Webmapp" map to the Satellite view, and the data, to show or hide the
+    routes ("Percorsi").</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/09-livelli.png" alt="Map type and data panel">
+        <figcaption>Panel with the map type (Webmapp / Satellite) and the data (routes)</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/09b-satellite.png" alt="Map in satellite view">
+        <figcaption>The same area in Satellite view</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="offline">
+    <h2>8. Using the app offline</h2>
+    <p>If you are going to areas with no signal, you can download a route in advance and keep
+    using it offline.</p>
+    <div class="avviso">
+      <strong>Before you leave</strong>, with your phone on Wi-Fi or with good coverage, open the
+      route you are interested in and download it.
+    </div>
+    <p>Open the route details and tap the download icon (the down arrow, among the icons on the
+    right of the map). A screen shows the progress of the map download and of the media
+    downloads.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/06-download-avvio.png" alt="Download in progress">
+        <figcaption>Download in progress: map and media download progress</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/06b-download-completato.png" alt="Download completed">
+        <figcaption>Download completed: the route is also available without a connection</figcaption>
+      </figure>
+    </div>
+    <div class="avviso">
+      <strong>Do not close the app</strong> during the download: the warning also appears on the
+      progress screen.
+    </div>
+    <p>From Profile → Downloads → <strong>Downloaded tracks</strong> you find the list of
+    downloaded routes, with their length, the space they take up and the <strong>Delete</strong>
+    option to free up space when you no longer need them.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/07-miei-download.png" alt="List of downloaded routes">
+        <figcaption>"Downloads": downloaded route with size, length and the Delete option</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <section id="profilo">
+    <h2>9. Profile and settings</h2>
+    <p>From <strong>Profile</strong> at the bottom you find the "Your data" section, with
+    Downloads and Downloaded tracks.</p>
+    <div class="shots">
+      <figure>
+        <img loading="lazy" src="images/11-profilo.png" alt="Profile section of the app">
+        <figcaption>Profile: Downloads and Downloaded tracks</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/12-impostazioni.png" alt="Settings screen">
+        <figcaption>Settings: app version, language, "stay lit" option, information pages and memory reset</figcaption>
+      </figure>
+      <figure>
+        <img loading="lazy" src="images/12b-lingua.png" alt="Window for choosing the app language">
+        <figcaption>Tapping "Language" you choose between Italian (it) and English (en), then confirm with OK</figcaption>
+      </figure>
+    </div>
+    <p>Tapping the gear icon at the top right of Profile opens the <strong>Settings</strong>,
+    where you find the app version, the language, the "stay lit" option (to stop the screen from
+    turning off by itself while you use the app), the links to Project, Disclaimer, Credits and
+    Privacy, and the option to "reset memory".</p>
+    <p>Tapping <strong>Language</strong> opens a window where you choose between Italian
+    (<strong>it</strong>) and English (<strong>en</strong>): select the language and tap
+    <strong>OK</strong>. The same window also opens from the Map, with the globe button next to
+    "Filters". The first time you open it, the app uses your phone's language if it is one of
+    those available; otherwise it starts in Italian.</p>
+    <p>"stay lit" has a switch, "forces the device not to turn off": turn it on before you set
+    off so the screen stays on while you follow the route, without having to unlock the phone
+    all the time (keep in mind that it uses more battery).</p>
+    <p>The "reset memory" button, in the Memory section, deletes all the data stored locally by
+    the app — including downloaded routes — freeing up the space they take: it is the same tool
+    suggested in the Frequently asked questions to free up space when there are too many
+    downloads. After using it you will have to download again the routes you want to keep using
+    offline.</p>
+  </section>
+
+  <section id="faq">
+    <h2>10. Frequently asked questions</h2>
+    <dl class="faq">
+      <dt>Do I need to sign up to use the app?</dt>
+      <dd>No, you can search for routes and points of interest and download them for offline use
+      without creating an account.</dd>
+
+      <dt>Does the app guide me step by step like a satnav?</dt>
+      <dd>No, Vivi Lama shows you the route on the map with all its data, but it does not give
+      voice or turn-by-turn directions like a car navigator.</dd>
+
+      <dt>How reliable are the travel times shown?</dt>
+      <dd>They are estimates calculated on the route. The Expected time at the top of the details
+      changes with the travel mode you choose (on foot or by bike), while the Duration in the
+      Technical Details is the walking time. In any case, the real time depends on your pace, the
+      ground conditions and the stops you make.</dd>
+
+      <dt>I downloaded a route but cannot find it: where do I look?</dt>
+      <dd>In Profile → Your data → Downloads → Downloaded tracks you find the full list of what
+      you downloaded.</dd>
+
+      <dt>My position on the map does not update: what should I check?</dt>
+      <dd>Check that the app has permission to access your phone's location and that location
+      (GPS) is turned on in your phone settings.</dd>
+
+      <dt>Downloads take up too much space: how do I remove them?</dt>
+      <dd>From Profile → Downloads → Downloaded tracks tap Delete on the route you no longer need;
+      to free all the space used by the app you can also use "reset memory" in the Settings.</dd>
+    </dl>
+    <div class="avviso">
+      <strong>When hiking</strong>, always bring water and suitable clothing, and tell someone
+      which route you are about to take: the app is an aid to finding your way, it does not
+      replace caution in the field.
+    </div>
+  </section>
+
+</main>
+
+<footer>
+  Vivi Lama Guide — <a href="https://apps.apple.com/app/vivi-lama/id6769355992" style="color:inherit;">App Store</a> ·
+  <a href="https://play.google.com/store/apps/details?id=it.lamamocogno.vivilama" style="color:inherit;">Google Play</a>
+  <br>
+  App developed by <a href="https://webmapp.it/" style="color:inherit;">Webmapp</a>
+  <br>
+  <a class="back-top" href="#cose">↑ Back to the contents</a>
+</footer>
+
+</body>
+</html>
