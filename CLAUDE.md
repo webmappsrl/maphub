@@ -39,6 +39,9 @@ Stack: Laravel 12, PHP 8.4, PostgreSQL + PostGIS, Nova 5, Elasticsearch 8, Redis
   scritti per esteso, non derivati da `${APP_NAME}` — vedi
   [docs/knowledge/cicd-e-deploy.md](docs/knowledge/cicd-e-deploy.md).
 - **Documentazione, commenti e messaggi di commit sono in italiano**, i termini tecnici in inglese.
+- **Le modifiche a `docker/configs/phpfpm/` o ai `ports` dei compose non arrivano ai server col
+  deploy**: richiedono `docker compose build --pull` e recreate manuali su dev e prod — la
+  sequenza è nella procedura di wm-package (`docs/howto/messa-in-sicurezza-php-shard.md`).
 
 ## Comandi
 
@@ -112,7 +115,7 @@ nel suo `CLAUDE.md`.
 
 | Argomento | Cosa copre | Ticket | Pagina |
 |---|---|---|---|
-| CI/CD e deploy | Pipeline, smoke test, nomi dei container, Horizon fra container | oc:8082 | [docs/knowledge/cicd-e-deploy.md](docs/knowledge/cicd-e-deploy.md) |
+| CI/CD e deploy | Pipeline, smoke test, nomi dei container, Horizon fra container, aggiornamento manuale dell'immagine PHP, porte dei servizi interni su localhost | oc:8082, oc:8842 | [docs/knowledge/cicd-e-deploy.md](docs/knowledge/cicd-e-deploy.md) |
 | Confini con wm-package | Cosa vive nel package, gli stub Nova, i test da non accoppiare | oc:8239, oc:8348 | [docs/knowledge/confini-con-wm-package.md](docs/knowledge/confini-con-wm-package.md) |
 | Import da GeoHub | Associazione layer/POI via taxonomy, ruolo degli utenti importati | oc:8043, oc:8042 | [docs/knowledge/import-da-geohub.md](docs/knowledge/import-da-geohub.md) |
 | Migration e stub | Il gate che guarda lo schema, i tre comandi, cosa fare caso per caso | oc:8218 | [docs/knowledge/migration-e-stub.md](docs/knowledge/migration-e-stub.md) |

@@ -42,7 +42,8 @@ services:
       - SERVER_NAME=kibana
       - SERVER_HOST=0.0.0.0
     ports:
-      - ${DOCKER_KIBANA_PORT:-5601}:5601
+      # Bind solo su localhost: Apache la raggiunge via 127.0.0.1 (oc:8842)
+      - 127.0.0.1:${DOCKER_KIBANA_PORT:-5601}:5601
   horizon:
     extra_hosts:
       - host.docker.internal:host-gateway
